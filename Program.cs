@@ -106,7 +106,7 @@ namespace HRM_Track_Merger {
             }
             if (dictionary.ContainsKey("age")) {
                 try {
-                    result.Age = Int32.Parse(dictionary["age"]);
+                    result.Age = Double.Parse(dictionary["age"]);
                 }
                 catch (Exception) {
                     throw new InvalidArgumentsException("Can't parse age");
@@ -156,7 +156,7 @@ namespace HRM_Track_Merger {
                 "",
                 "Optional data for calories calculation (Caution! It will replace data from HRM!):",
                 "<sex> - male or female",
-                "<age> - age in years",
+                "<age> - age in years (floating-point number is OK, use dot as separator)",
                 "<weight> - weight in KILOGRAMS (floating-point number is OK, use dot as separator)",
                 "<vo2max> - ml/kg/min"
             }));
