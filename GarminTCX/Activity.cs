@@ -14,7 +14,7 @@ namespace HRM_Track_Merger.GarminTCX {
         public System.Xml.XmlNode GenerateXML(System.Xml.XmlDocument doc) {
             var xmlNS = doc.DocumentElement.NamespaceURI;
             var actElem = doc.CreateElement("Activity", xmlNS);
-            actElem.SetAttribute("Sport", xmlNS, Sport.ToString());
+            actElem.SetAttribute("Sport", Sport.ToString());
             actElem.AppendChild(doc.CreateElement("Id", xmlNS)).InnerXml = TCXFile.DateTimeToXmlString(Id);
             foreach (var lap in Laps) {
                 actElem.AppendChild(lap.GenerateXML(doc));

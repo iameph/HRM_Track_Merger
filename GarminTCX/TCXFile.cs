@@ -14,7 +14,6 @@ namespace HRM_Track_Merger.GarminTCX {
             + "xmlns:ns2=\"http://www.garmin.com/xmlschemas/UserProfile/v2\" xmlns=\"http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2\" "
             + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:ns4=\"http://www.garmin.com/xmlschemas/ProfileExtension/v1\"></TrainingCenterDatabase>";
         private string xmlNS = "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2";
-        private string actNS = "http://www.garmin.com/xmlschemas/ActivityExtension/v2";
         private XmlDocument doc;
         public TCXFile() {
             Activities = new List<Activity>();

@@ -13,7 +13,7 @@ namespace HRM_Track_Merger.GarminTCX {
         public uint Calories;
         public HeartRate AverageHeartRateBpm;
         public HeartRate MaximumHeartRateBpm;
-        public string Intesity;
+        public string Intensity;
         public byte? Cadence;
         public string TriggerMethod;
         public List<TrackPoint> Track;
@@ -22,7 +22,7 @@ namespace HRM_Track_Merger.GarminTCX {
         public System.Xml.XmlNode GenerateXML(System.Xml.XmlDocument doc) {
             var xmlNS = doc.DocumentElement.NamespaceURI;
             var lapElem = doc.CreateElement("Lap", xmlNS);
-            lapElem.SetAttribute("StartTime", xmlNS, TCXFile.DateTimeToXmlString(StartTime));
+            lapElem.SetAttribute("StartTime", TCXFile.DateTimeToXmlString(StartTime));
             lapElem.AppendChild(doc.CreateElement("TotalTimeSeconds", xmlNS));
             lapElem["TotalTimeSeconds"].InnerXml = TotalTimeSeconds.ToString();
             lapElem.AppendChild(doc.CreateElement("DistanceMeters", xmlNS));
@@ -37,10 +37,10 @@ namespace HRM_Track_Merger.GarminTCX {
                 lapElem.AppendChild(AverageHeartRateBpm.GenerateXML(doc, "AverageHeartRateBpm"));
             }
             if (MaximumHeartRateBpm != null) {
-                lapElem.AppendChild(AverageHeartRateBpm.GenerateXML(doc, "MaximumHeartRateBpm"));
+                lapElem.AppendChild(MaximumHeartRateBpm.GenerateXML(doc, "MaximumHeartRateBpm"));
             }
             lapElem.AppendChild(doc.CreateElement("Intensity", xmlNS));
-            lapElem["Intensity"].InnerXml = Intesity;
+            lapElem["Intensity"].InnerXml = Intensity;
             if (Cadence != null) {
                 lapElem.AppendChild(doc.CreateElement("Cadence", xmlNS));
                 lapElem["Cadence"].InnerXml = Cadence.ToString();
