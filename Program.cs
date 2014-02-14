@@ -9,21 +9,33 @@ using System.Threading.Tasks;
 namespace HRM_Track_Merger {
     class Program {
         static int Main(string[] args) {
-            var hrmFile = PolarHRM.PolarHRMFile.Parse(@".\..\..\Samples\sample.hrm");
+            if (args.Length == 0 || args.Contains("/?") || args.Contains("-h") || args.Contains("--h)")) {
+                ShowUsageInfo();
+                return 0;
+            }
             return 0;
         }
 
         private static void ShowUsageInfo() {
+            System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
+            string version = fvi.FileVersion;
+            string name = "HRM_Track_Merger";
             Console.WriteLine(String.Join("\n", new string[] { 
-                "Usage: HRM_Track_Merger.exe <gpx file> <offset> <starttime> <duration> <step>",
-                "\tor: HRM_Track_Merger.exe <gpx file> <hrm file> [<offset>]",
+                name + " version: " + version,
+                "Software to merge heartrate monitor data with gps data to TCX XML format",
+                "",
+                "Usage: "+name+ ".exe <hrm file> [<gpx file>] [/output:<output_file_name>] [/offset:<offset>] [/age:<age>] [/weight:<weight>] [/vo2max:<vo2max>]",
                 "where:",
+                "<hrm file> - path to hrm file, currently Polar HRM(.hrm) supported",
                 "<gpx file> - path to gpx file",
-                "<offset> - time in seconds that gpx offseted from hrm",
-                "<starttime> - time in format \"HH:mm:ss\"",
-                "<duration> - time in format \"HH:mm:ss\"",
-                "<step> - interval between measurements in hrm file",
-                "<hrm file> - path to hrm file for collecting time settings"
+                "<output_file_name> - path to output file" ,
+                "<offset> - offset in seconds to add to GPS time",
+                "",
+                "Optional data for calories calculation (Caution! It will replace data from HRM!):",
+                "<age> - age in years",
+                "<weight> - weight in KILOGRAMS (floating-point number is OK, use dot as separator)",
+                "<vo2max> - ml/kg/min"
             }));
         }
 
