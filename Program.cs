@@ -34,44 +34,52 @@ namespace HRM_Track_Merger {
                 }
                 var hrmFile = PolarHRM.PolarHRMFile.Parse(cmdArgs.HRMFileName);
                 var exercise = new ExerciseData.CommonExerciseData(hrmFile);
-                ExerciseData.UserData user = ParseUserOptions(cmdArgs.GetOptions());
-                exercise.UpdateUserData(user, false);
+                Settings settings;
+                if (File.Exists("settings.cfg")) {
+                    settings = new Settings("settings.cfg");
+                }
+                else {
+                    settings = Settings.Default;
+                }
+                exercise.UpdateUserData(settings.GetUserData(exercise.Totals.Time.Start), true);
+                exercise.UpdateUserData(ParseUserOptions(cmdArgs.GetOptions()), false);
+
                 if (cmdArgs.GPSFileName != null) {
                     TimeSpan offset = TimeSpan.Zero;
                     if (cmdArgs.GetOptions().ContainsKey("offset")) {
                         offset = new TimeSpan(0, 0, Int32.Parse(cmdArgs.GetOptions()["offset"]));
                     }
-                    exercise.AddGPSData(new GPXFile(cmdArgs.GPSFileName),offset);
+                    exercise.AddGPSData(new GPXFile(cmdArgs.GPSFileName), offset);
                 }
                 exercise.UpdateCaloriesData();
                 var tcxFile = exercise.ConvertToTCX();
+                GarminTCX.Sport sport = GarminTCX.Sport.Other;
+                if (settings.Sport != null) {
+                    Enum.TryParse<GarminTCX.Sport>(settings.Sport, true, out sport);
+                }
                 if (cmdArgs.GetOptions().ContainsKey("sport")) {
-                    GarminTCX.Sport sport;
-                    switch (cmdArgs.GetOptions()["sport"].ToLower()) {
-                        case "biking" : 
-                            sport = GarminTCX.Sport.Biking;
-                            break;
-                        case "running":
-                            sport = GarminTCX.Sport.Running;
-                            break;
-                        case "other":
-                            sport = GarminTCX.Sport.Other;
-                            break;
-                        default:
-                            sport = GarminTCX.Sport.Other;
-                            Console.WriteLine("Incorrect sport name, use Other instead");
-                            break;
+                    if (!Enum.TryParse<GarminTCX.Sport>(cmdArgs.GetOptions()["sport"], true, out sport)) {
+                        Console.WriteLine("Incorrect sport name, use Other instead");
+                        sport = GarminTCX.Sport.Other;
                     }
-                    tcxFile.SetSport(0, sport);
+                }
+                tcxFile.SetSport(0, sport);
+                if (settings.Device != null) {
+                    foreach (var act in tcxFile.Activities) {
+                        act.Creator = settings.Device;
+                    }
+                }
+                if (settings.Author != null) {
+                    tcxFile.Author = settings.Author;
                 }
                 string outputFileName;
                 if (cmdArgs.GetOptions().ContainsKey("output")) {
                     outputFileName = cmdArgs.GetOptions()["output"];
                 }
                 else {
-                    outputFileName = GenerateOutputFileName(cmdArgs.HRMFileName,cmdArgs.GPSFileName);
+                    outputFileName = GenerateOutputFileName(cmdArgs.HRMFileName, cmdArgs.GPSFileName);
                 }
-                tcxFile.Save(outputFileName, new System.Xml.XmlWriterSettings() { Indent=true, IndentChars="\t"});
+                tcxFile.Save(outputFileName, new System.Xml.XmlWriterSettings() { Indent = true, IndentChars = "\t" });
             }
             catch (Exception e) {
                 Console.WriteLine(e.Message);
@@ -83,7 +91,7 @@ namespace HRM_Track_Merger {
         private static string GenerateOutputFileName(string hrmFileName, string gpsFileName) {
             StringBuilder name = new StringBuilder();
             name.Append(Path.GetFileNameWithoutExtension(hrmFileName));
-            if(gpsFileName!=null){
+            if (gpsFileName != null) {
                 name.Append("_Merge");
             }
             name.Append("_");
