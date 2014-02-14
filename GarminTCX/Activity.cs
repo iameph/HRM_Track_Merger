@@ -20,7 +20,7 @@ namespace HRM_Track_Merger.GarminTCX {
                 actElem.AppendChild(lap.GenerateXML(doc));
             }
             if (Notes != null) {
-                actElem.AppendChild(doc.CreateElement("Notes", xmlNS)).InnerXml = Notes;
+                actElem.AppendChild(doc.CreateElement("Notes", xmlNS)).InnerXml = Notes.Trim();
             }
             if (Creator != null) {
                 actElem.AppendChild(Creator.GenerateXML(doc));

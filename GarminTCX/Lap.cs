@@ -55,7 +55,7 @@ namespace HRM_Track_Merger.GarminTCX {
             }
             if (Notes != null) {
                 lapElem.AppendChild(doc.CreateElement("Notes", xmlNS));
-                lapElem["Notes"].InnerXml = Notes;
+                lapElem["Notes"].InnerXml = Notes.Trim();
             }
             if (Extension != null) {
                 lapElem.AppendChild(Extension.GenerateXML(doc));
