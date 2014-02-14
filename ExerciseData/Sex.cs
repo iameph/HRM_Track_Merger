@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace HRM_Track_Merger.ExerciseData {
-    enum Gender {
+    enum Sex {
         Male,
         Female
     }

@@ -11,6 +11,6 @@ namespace HRM_Track_Merger.ExerciseData {
         public int? RestHR;
         public double? VO2Max;
         public int? Age;
-        public Gender? Gender;
+        public Sex? Sex;
     }
 }

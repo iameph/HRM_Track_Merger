@@ -45,7 +45,7 @@
     <Compile Include="DateTimeRange.cs" />
     <Compile Include="ExerciseData\CommonExerciseData.cs" />
     <Compile Include="ExerciseData\DataPoint.cs" />
-    <Compile Include="ExerciseData\Gender.cs" />
+    <Compile Include="ExerciseData\Sex.cs" />
     <Compile Include="ExerciseData\Lap.cs" />
     <Compile Include="ExerciseData\Range.cs" />
     <Compile Include="ExerciseData\Summary.cs" />
