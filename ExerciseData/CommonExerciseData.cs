@@ -7,29 +7,54 @@ using System.Threading.Tasks;
 namespace HRM_Track_Merger.ExerciseData {
     class CommonExerciseData {
         public UserData UserData { get; set; }
-        public CommonExerciseData(PolarHRM.PolarHRMFile polarHRM) {
-            Load(polarHRM);
+        public CommonExerciseData(IExercise exercise) {
+            Load(exercise);
         }
-
         public CommonExerciseData() {
             // TODO: Complete member initialization
         }
-        public void Load(PolarHRM.PolarHRMFile polarHRM) {
-            UserData = createUserData(polarHRM);
-            DataPoints = polarHRM.GetDataPointsInMetricSystem();
-            var PolarTrip = polarHRM.GetTripDataInMetricSystem();
-            var PolarLaps = polarHRM.GetLapsInMetricSystem();
-            createLapsFromPolarLaps(PolarLaps);
-            createSummaryFromPolarTrip(PolarTrip);
-            Totals.Time = new DateTimeRange(polarHRM.StartTime, polarHRM.Duration);
+        public void Load(IExercise exercise) {
+            UserData = exercise.GetUserData();
+            DataPoints = exercise.GetDataPoints();
+            insertPartialDataPoints(exercise.GetDataPointsWithPartialData());
+            Totals = exercise.GetTotals();
+            Laps = exercise.GetLaps();
             correctLapsFromDataPoints();
             correctTotalsFromDataPoints();
             UpdateCaloriesData();
             correctTotalsTemperatureFromLaps();
             CalculateDataPointDistances();
-            setDataAvailabilityFields(polarHRM);
-            Totals.Note = polarHRM.Note;
+            setDataAvailabilityFields(exercise);
         }
+
+        private void insertPartialDataPoints(List<DataPoint> partialDataPoints) {
+            foreach (var point in partialDataPoints) {
+                if (!DataPointExists(point.Time)) {
+                    var pointNew = GetDataPointWithInterpolation(point.Time);
+                    if (point.Altitude != 0) {
+                        pointNew.Altitude = point.Altitude;
+                    }
+                    if (point.Cadence != 0) {
+                        pointNew.Cadence = point.Cadence;
+                    }
+                    if (point.HeartRate != 0) {
+                        pointNew.HeartRate = point.HeartRate;
+                    }
+                    if (point.Power != 0) {
+                        pointNew.Power = point.Power;
+                    }
+                    if (point.PowerBalance != 0) {
+                        pointNew.PowerBalance = point.PowerBalance;
+                    }
+                    if (point.Speed != 0) {
+                        pointNew.Speed = point.Speed;
+                    }
+                    InsertDataPoint(pointNew);
+                }
+            }
+        }
+
+
         public void UpdateUserData(ExerciseData.UserData data, bool currentDataHasPriority) {
             if (data == null) return;
             if (UserData == null) {
@@ -74,7 +99,16 @@ namespace HRM_Track_Merger.ExerciseData {
             IsPowerDataAvailable = polarHRM.IsPowerDataAvailable;
             IsSpeedDataAvailable = polarHRM.IsSpeedDataAvailable;
         }
-
+        private void setDataAvailabilityFields(IExercise exercise) {
+            IsAirPressureDataAvailable = exercise.IsAirPressureDataAvailable;
+            IsAltitudeDataAvailable = exercise.IsAltitudeDataAvailable;
+            IsBalanceDataAvailable = exercise.IsBalanceDataAvailable;
+            IsCadenceDataAvailable = exercise.IsCadenceDataAvailable;
+            IsCyclingDataAvailable = exercise.IsCyclingDataAvailable;
+            IsPedallingIndexDataAvailable = exercise.IsPedallingIndexDataAvailable;
+            IsPowerDataAvailable = exercise.IsPowerDataAvailable;
+            IsSpeedDataAvailable = exercise.IsSpeedDataAvailable;
+        }
         private void correctTotalsTemperatureFromLaps() {
             double temp = 0;
             foreach (var lap in Laps) {
@@ -101,25 +135,39 @@ namespace HRM_Track_Merger.ExerciseData {
             if (Totals.Distance > sum.Distance) {
                 sum.Distance = Totals.Distance;
             }
+            if (Totals.Power.Max > sum.Power.Max) {
+                sum.Power.Max = Totals.Power.Max;
+            }
             Totals = sum;
         }
 
         private void correctLapsFromDataPoints() {
-            var temp = Laps[0].Totals.Temperature.Min;
+            var tempMin = Laps[0].Totals.Temperature.Min;
+            var tempMax = Laps[0].Totals.Temperature.Max;
             foreach (var lap in Laps) {
                 var sum = calculateSummaryData(lap.Totals.Time);
-                var temp2 = lap.Totals.Temperature.Min;
+                var tempMin2 = lap.Totals.Temperature.Min;
+                var tempMax2 = lap.Totals.Temperature.Max;
                 sum.Temperature = new Range<double>(
-                    Math.Min(temp, temp2),
-                    (temp + temp2) / 2,
-                    Math.Max(temp, temp2));
-                temp = temp2;
-
+                    Math.Min(tempMin, tempMin2),
+                    (Math.Min(tempMin, tempMin2) + Math.Max(tempMax, tempMax2)) / 2,
+                    Math.Max(tempMax, tempMax2));
+                tempMin = tempMin2;
+                tempMax = tempMax2;
                 if (lap.Totals.HeartRate.Max > sum.HeartRate.Max) {
                     sum.HeartRate.Max = lap.Totals.HeartRate.Max;
                 }
                 if (lap.Totals.HeartRate.Min > 0 && lap.Totals.HeartRate.Min < sum.HeartRate.Min) {
                     sum.HeartRate.Min = lap.Totals.HeartRate.Min;
+                }
+                if (lap.Totals.Speed.Max > sum.Speed.Max && (lap.Totals.Speed.Max - sum.Speed.Max < 3/*magic number*/)) {
+                    sum.Speed.Max = lap.Totals.Speed.Max;
+                }
+                if (lap.Totals.Power.Max > sum.Power.Max && (lap.Totals.Power.Max - sum.Power.Max < 50/*magic number*/)) {
+                    sum.Power.Max = lap.Totals.Power.Max;
+                }
+                if (lap.Totals.Cadence.Max > sum.Cadence.Max && (lap.Totals.Cadence.Max - sum.Cadence.Max < 10/*magic number*/)) {
+                    sum.Cadence.Max = lap.Totals.Cadence.Max;
                 }
                 lap.Totals = sum;
             }
@@ -374,8 +422,12 @@ namespace HRM_Track_Merger.ExerciseData {
         public bool IsNavigationDataAvailable { get; private set; }
 
         public GarminTCX.TCXFile ConvertToTCX() {
-
             var tcxFile = new GarminTCX.TCXFile();
+            tcxFile.Activities.Add(ConvertToTCXActivity());
+            return tcxFile;
+        }
+
+        public GarminTCX.Activity ConvertToTCXActivity() {
             var activity = new GarminTCX.Activity() {
                 Creator = new GarminTCX.Creator() {
                     Name = "Unknown Device",
@@ -388,7 +440,6 @@ namespace HRM_Track_Merger.ExerciseData {
                 Notes = Totals.Note,
                 Sport = GarminTCX.Sport.Other,
             };
-            tcxFile.Activities.Add(activity);
             foreach (var lap in Laps) {
                 var tcxLap = new GarminTCX.Lap() {
                     StartTime = lap.Totals.Time.Start,
@@ -454,7 +505,7 @@ namespace HRM_Track_Merger.ExerciseData {
 
                 activity.Laps.Add(tcxLap);
             }
-            return tcxFile;
+            return activity;
         }
     }
 }
