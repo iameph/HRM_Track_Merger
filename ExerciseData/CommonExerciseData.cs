@@ -1,0 +1,293 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace HRM_Track_Merger.ExerciseData {
+    class CommonExerciseData {
+        public CommonExerciseData(PolarHRM.PolarHRMFile polarHRM) {
+            DataPoints = polarHRM.GetDataPointsInMetricSystem();
+            var PolarTrip = polarHRM.GetTripDataInMetricSystem();
+            var PolarLaps = polarHRM.GetLapsInMetricSystem();
+            createLapsFromPolarLaps(PolarLaps);
+            createSummaryFromPolarTrip(PolarTrip);
+            Totals.Time = new DateTimeRange(polarHRM.StartTime, polarHRM.Duration);
+            correctLapsFromDataPoints();
+            correctTotalsFromDataPoints();
+            correctTotalsTemperatureFromLaps();
+            setDataAvailabilityFields(polarHRM);
+        }
+
+        private void setDataAvailabilityFields(PolarHRM.PolarHRMFile polarHRM) {
+            IsAirPressureDataAvailable = polarHRM.IsAirPressureDataAvailable;
+            IsAltitudeDataAvailable = polarHRM.IsAirPressureDataAvailable;
+            IsBalanceDataAvailable = polarHRM.IsBalanceDataAvailable;
+            IsCadenceDataAvailable = polarHRM.IsCadenceDataAvailable;
+            IsCyclingDataAvailable = polarHRM.IsCyclingDataAvailable;
+            IsPedallingIndexDataAvailable = polarHRM.IsPedallingIndexDataAvailable;
+            IsPowerDataAvailable = polarHRM.IsPowerDataAvailable;
+            IsSpeedDataAvailable = polarHRM.IsSpeedDataAvailable;
+        }
+
+        private void correctTotalsTemperatureFromLaps() {
+            double temp = 0;
+            foreach (var lap in Laps) {
+                temp += lap.Totals.Temperature.Avg * lap.Totals.Time.Duration.TotalSeconds;
+            }
+            Totals.Temperature = new Range<double>(
+                Laps.Min(lap => lap.Totals.Temperature.Min),
+                temp / Totals.Time.Duration.TotalSeconds,
+                Laps.Max(lap => lap.Totals.Temperature.Max)
+                );
+        }
+
+        private void correctTotalsFromDataPoints() {
+            var sum = calculateSummaryData(Totals.Time);
+            if (Totals.Altitude.Max > sum.Altitude.Max) {
+                sum.Altitude.Max = Totals.Altitude.Max;
+            }
+            if (Totals.Speed.Max > sum.Speed.Max) {
+                sum.Speed.Max = Totals.Speed.Max;
+            }
+            if (Totals.Ascent > sum.Ascent) {
+                sum.Ascent = Totals.Ascent;
+            }
+            if (Totals.Distance > sum.Distance) {
+                sum.Distance = Totals.Distance;
+            }
+            Totals = sum;
+        }
+
+        private void correctLapsFromDataPoints() {
+            var temp = Laps[0].Totals.Temperature.Min;
+            foreach (var lap in Laps) {
+                var sum = calculateSummaryData(lap.Totals.Time);
+                var temp2 = lap.Totals.Temperature.Min;
+                sum.Temperature = new Range<double>(
+                    Math.Min(temp, temp2),
+                    (temp + temp2) / 2,
+                    Math.Max(temp, temp2));
+                temp = temp2;
+
+                if (lap.Totals.HeartRate.Max > sum.HeartRate.Max) {
+                    sum.HeartRate.Max = lap.Totals.HeartRate.Max;
+                }
+                if (lap.Totals.HeartRate.Min > 0 && lap.Totals.HeartRate.Min < sum.HeartRate.Min) {
+                    sum.HeartRate.Min = lap.Totals.HeartRate.Min;
+                }
+                lap.Totals = sum;
+            }
+        }
+
+        public Summary calculateSummaryData(DateTimeRange range) {
+            var points = DataPoints.FindAll((point) => (point.Time >= range.Start && point.Time <= range.End));
+            points.Sort();
+            if (points[0].Time > range.Start) {
+                points.Insert(0, GetDataPointWithInterpolation(range.Start));
+            }
+            if (points.Last().Time < range.End) {
+                points.Add(GetDataPointWithInterpolation(range.End));
+            }
+            Summary result = new Summary();
+            double dist = 0;
+            Range<double> Altitude = new Range<double>(0, 0, 0);
+            double ascent = 0;
+            Range<double> Cadence = new Range<double>(0, 0, 0);
+            double cadenceTime = 0;
+            Range<double> HeartRate = new Range<double>(0, 0, 0);
+            Range<double> Power = new Range<double>(0, 0, 0);
+            Range<double> PowerBalance = new Range<double>(0, 0, 0);
+            Range<double> Speed = new Range<double>(0, 0, 0);
+            double speedTime = 0;
+            double calories = 0;
+            for (int i = 1; i < points.Count; ++i) {
+                var timeDiff = (points[i].Time - points[i - 1].Time).TotalSeconds;
+                dist += (points[i].Speed + points[i - 1].Speed) * timeDiff / 2 / 3600;
+                Altitude.Avg += (points[i].Altitude + points[i - 1].Altitude) * timeDiff / 2;
+                if (points[i].Altitude > points[i - 1].Altitude) {
+                    ascent += points[i].Altitude - points[i - 1].Altitude;
+                }
+                if (points[i].Cadence > 0 && points[i - 1].Cadence > 0) {
+                    Cadence.Avg += (points[i].Cadence + points[i - 1].Cadence) * timeDiff / 2;
+                    cadenceTime += timeDiff;
+                }
+                HeartRate.Avg += (points[i].HeartRate + points[i - 1].HeartRate) * timeDiff / 2;
+                Power.Avg += (points[i].Power + points[i - 1].Power) * timeDiff / 2;
+                PowerBalance.Avg += (points[i].PowerBalance + points[i - 1].PowerBalance) * timeDiff / 2;
+                if (points[i].Speed > 0 && points[i - 1].Speed > 0) {
+                    Speed.Avg += (points[i].Speed + points[i - 1].Speed) * timeDiff / 2;
+                    speedTime += timeDiff;
+                }
+
+                calories += calculateCalories((points[i].HeartRate + points[i - 1].HeartRate) * timeDiff / 2, timeDiff);
+            }
+            Altitude.Avg = Altitude.Avg / range.Duration.TotalSeconds;
+            Cadence.Avg = Cadence.Avg / cadenceTime;
+            HeartRate.Avg = HeartRate.Avg / range.Duration.TotalSeconds;
+            Power.Avg = Power.Avg / range.Duration.TotalSeconds;
+            PowerBalance.Avg = PowerBalance.Avg / range.Duration.TotalSeconds;
+            Speed.Avg = Speed.Avg / speedTime;
+
+            Altitude.Min = points.Min(point => point.Altitude);
+            Altitude.Max = points.Max(point => point.Altitude);
+
+            Cadence.Min = points.Min(point => point.Cadence > 0 ? point.Cadence : Double.PositiveInfinity);
+            Cadence.Max = points.Max(point => point.Cadence > 0 ? point.Cadence : Double.NegativeInfinity);
+
+            HeartRate.Min = points.Min(point => point.HeartRate);
+            HeartRate.Max = points.Max(point => point.HeartRate);
+
+            Power.Min = points.Min(point => point.Power);
+            Power.Max = points.Max(point => point.Power);
+
+            PowerBalance.Min = points.Min(point => point.PowerBalance);
+            PowerBalance.Max = points.Max(point => point.PowerBalance);
+
+            Speed.Min = points.Min(point => point.Speed);
+            Speed.Max = points.Max(point => point.Speed);
+
+            return new Summary() {
+                Altitude = Altitude,
+                Ascent = ascent,
+                Cadence = Cadence,
+                Calories = calories,
+                Distance = dist,
+                HeartRate = HeartRate,
+                Power = Power,
+                Speed = Speed,
+                Time = range
+            };
+        }
+
+        private double calculateCalories(double heartRate, double time) {
+            return 0;
+        }
+
+        private void createSummaryFromPolarTrip(PolarHRM.PolarHRMFile.TripData PolarTrip) {
+            Totals = new Summary() {
+                Altitude = new Range<double>(0, PolarTrip.AvgAltitude, PolarTrip.MaxAltitude),
+                Ascent = PolarTrip.Ascent,
+                Distance = PolarTrip.Distance,
+                Speed = new Range<double>(0, PolarTrip.AvgSpeed, PolarTrip.MaxSpeed),
+            };
+        }
+
+        private void createLapsFromPolarLaps(List<PolarHRM.Lap> PolarLaps) {
+            foreach (var lap in PolarLaps) {
+                if (!DataPointExists(lap.StartTime + lap.Duration)) {
+                    var point = GetDataPointWithInterpolation(lap.StartTime + lap.Duration);
+                    point.Altitude = lap.Altitude;
+                    point.Cadence = lap.Cadence;
+                    point.HeartRate = lap.HR;
+                    point.Power = lap.Power;
+                    point.PowerBalance = 0;
+                    point.Speed = lap.Speed;
+                    InsertDataPoint(point);
+                }
+            }
+            Laps = new List<Lap>(PolarLaps.Count);
+            foreach (var lap in PolarLaps) {
+                Laps.Add(new Lap() {
+                    Totals = new Summary() {
+                        Distance = lap.Distance,
+                        HeartRate = new Range<double>() {
+                            Min = lap.HRmin,
+                            Avg = lap.HRavg,
+                            Max = lap.HRmax
+                        },
+                        Temperature = new Range<double>() {
+                            Min = lap.Temperature,
+                            Avg = lap.Temperature,
+                            Max = lap.Temperature
+                        },
+                        Time = new DateTimeRange(lap.StartTime, lap.Duration)
+                    }
+                });
+            }
+        }
+        public bool DataPointExists(DateTime time) {
+            return DataPoints.Any(point => point.Time == time);
+        }
+        public void InsertDataPoint(DataPoint point) {
+            var idx = DataPoints.BinarySearch(point);
+            if (idx > 0) return;
+            DataPoints.Insert(~idx, point);
+        }
+        public DataPoint GetDataPointWithInterpolation(DateTime time) {
+            var idx = DataPoints.BinarySearch(new DataPoint() { Time = time });
+            if (idx >= 0) {
+                return (DataPoint)DataPoints[idx].Clone();
+            }
+            idx = ~idx;
+            DataPoint point;
+            if (idx == 0) {
+                point = (DataPoint)DataPoints[0].Clone();
+                point.Time = time;
+            }
+            else if (idx == DataPoints.Count) {
+                point = (DataPoint)DataPoints.Last().Clone();
+                point.Time = time;
+            }
+            else {
+                point = InterpolateDataPoint(DataPoints[idx - 1], DataPoints[idx], time);
+            }
+            return point;
+        }
+
+        private DataPoint InterpolateDataPoint(DataPoint dataPoint1, DataPoint dataPoint2, DateTime time) {
+            double x1 = 0;
+            double x2 = (dataPoint2.Time - dataPoint1.Time).TotalSeconds;
+            double x = (time - dataPoint1.Time).TotalSeconds;
+            return new DataPoint() {
+                AirPressure = Interpolate(x1, x2, dataPoint1.AirPressure, dataPoint2.AirPressure, x),
+                Altitude = Interpolate(x1, x2, dataPoint1.Altitude, dataPoint2.Altitude, x),
+                Cadence = Interpolate(x1, x2, dataPoint1.Cadence, dataPoint2.Cadence, x),
+                Distance = Interpolate(x1, x2, dataPoint1.Distance, dataPoint2.Distance, x),
+                HeartRate = Interpolate(x1, x2, dataPoint1.HeartRate, dataPoint2.HeartRate, x),
+                Latitude = Interpolate(x1, x2, dataPoint1.Latitude, dataPoint2.Latitude, x),
+                Longitude = Interpolate(x1, x2, dataPoint1.Longitude, dataPoint2.Longitude, x),
+                Power = Interpolate(x1, x2, dataPoint1.Power, dataPoint2.Power, x),
+                PowerBalance = Interpolate(x1, x2, dataPoint1.PowerBalance, dataPoint2.PowerBalance, x),
+                Speed = Interpolate(x1, x2, dataPoint1.Speed, dataPoint2.Speed, x),
+                Time = time
+            };
+        }
+
+        public List<Lap> Laps { get; private set; }
+        public Summary Totals { get; private set; }
+        public List<DataPoint> DataPoints { get; private set; }
+
+        public void CalculateDataPointDistances() {
+            for (int i = 1; i < DataPoints.Count; ++i) {
+                DataPoints[i].Distance = DataPoints[i - 1].Distance + (DataPoints[i].Speed + DataPoints[i - 1].Speed) / 2
+                    * ((DataPoints[i].Time - DataPoints[i - 1].Time).TotalSeconds / 3600);
+            }
+        }
+        public static double Interpolate(double x1, double x2, double y1, double y2, double x) {
+            if (x <= x1) {
+                return y1;
+            }
+            if (x >= x2) {
+                return y2;
+            }
+            return (x - x1) * (y2 - y1) / (x2 - x1) + y1;
+        }
+
+        public bool IsCadenceDataAvailable { get; private set; }
+
+        public bool IsAltitudeDataAvailable { get; private set; }
+
+        public bool IsCyclingDataAvailable { get; private set; }
+
+        public bool IsAirPressureDataAvailable { get; private set; }
+
+        public bool IsSpeedDataAvailable { get; private set; }
+
+        public bool IsPowerDataAvailable { get; private set; }
+
+        public bool IsBalanceDataAvailable { get; private set; }
+
+        public bool IsPedallingIndexDataAvailable { get; private set; }
+    }
+}
