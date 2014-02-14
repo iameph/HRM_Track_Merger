@@ -207,7 +207,7 @@ namespace HRM_Track_Merger.PolarHRM {
             if (Params.TryGetValue("RestHR", out val)) {
                 UserSettings.RestHR = Int32.Parse(val);
             }
-            if (Params.TryGetValue("VO2Max", out val)) {
+            if (Params.TryGetValue("VO2max", out val)) {
                 UserSettings.VO2Max = Double.Parse(val);
             }
             if (Params.TryGetValue("Age", out val)) {
