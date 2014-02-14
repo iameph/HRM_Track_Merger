@@ -5,11 +5,26 @@ using System.Linq;
 namespace HRM_Track_Merger.ExerciseData {
     class CommonExerciseData {
         public UserData UserData { get; set; }
+        public List<Lap> Laps { get; private set; }
+        public Summary Totals { get; private set; }
+        public List<DataPoint> DataPoints { get; private set; }
+
+        #region AvailabilityFields
+        public bool IsCadenceDataAvailable { get; private set; }
+        public bool IsAltitudeDataAvailable { get; private set; }
+        public bool IsCyclingDataAvailable { get; private set; }
+        public bool IsAirPressureDataAvailable { get; private set; }
+        public bool IsSpeedDataAvailable { get; private set; }
+        public bool IsPowerDataAvailable { get; private set; }
+        public bool IsBalanceDataAvailable { get; private set; }
+        public bool IsPedallingIndexDataAvailable { get; private set; }
+        public bool IsNavigationDataAvailable { get; private set; }
+        #endregion
+
         public CommonExerciseData(IExercise exercise) {
             Load(exercise);
         }
         public CommonExerciseData() {
-            // TODO: Complete member initialization
         }
         public void Load(IExercise exercise) {
             UserData = exercise.GetUserData();
@@ -51,8 +66,6 @@ namespace HRM_Track_Merger.ExerciseData {
                 }
             }
         }
-
-
         public void UpdateUserData(ExerciseData.UserData data, bool currentDataHasPriority) {
             if (data == null) return;
             if (UserData == null) {
@@ -76,27 +89,7 @@ namespace HRM_Track_Merger.ExerciseData {
                 first = second;
             }
         }
-        private ExerciseData.UserData createUserData(PolarHRM.PolarHRMFile polarHRM) {
-            var data = new UserData() {
-                Age = polarHRM.UserSettings.Age,
-                MaxHR = polarHRM.UserSettings.MaxHR,
-                RestHR = polarHRM.UserSettings.RestHR,
-                VO2Max = polarHRM.UserSettings.VO2Max,
-                Weight = polarHRM.UserSettings.Weight
-            };
-            return data;
-        }
 
-        private void setDataAvailabilityFields(PolarHRM.PolarHRMFile polarHRM) {
-            IsAirPressureDataAvailable = polarHRM.IsAirPressureDataAvailable;
-            IsAltitudeDataAvailable = polarHRM.IsAltitudeDataAvailable;
-            IsBalanceDataAvailable = polarHRM.IsBalanceDataAvailable;
-            IsCadenceDataAvailable = polarHRM.IsCadenceDataAvailable;
-            IsCyclingDataAvailable = polarHRM.IsCyclingDataAvailable;
-            IsPedallingIndexDataAvailable = polarHRM.IsPedallingIndexDataAvailable;
-            IsPowerDataAvailable = polarHRM.IsPowerDataAvailable;
-            IsSpeedDataAvailable = polarHRM.IsSpeedDataAvailable;
-        }
         private void setDataAvailabilityFields(IExercise exercise) {
             IsAirPressureDataAvailable = exercise.IsAirPressureDataAvailable;
             IsAltitudeDataAvailable = exercise.IsAltitudeDataAvailable;
@@ -107,6 +100,7 @@ namespace HRM_Track_Merger.ExerciseData {
             IsPowerDataAvailable = exercise.IsPowerDataAvailable;
             IsSpeedDataAvailable = exercise.IsSpeedDataAvailable;
         }
+
         private void correctTotalsTemperatureFromLaps() {
             double temp = 0;
             foreach (var lap in Laps) {
@@ -118,7 +112,6 @@ namespace HRM_Track_Merger.ExerciseData {
                 Laps.Max(lap => lap.Totals.Temperature.Max)
                 );
         }
-
         private void correctTotalsFromDataPoints() {
             var sum = calculateSummaryData(Totals.Time);
             if (Totals.Altitude.Max > sum.Altitude.Max) {
@@ -138,7 +131,6 @@ namespace HRM_Track_Merger.ExerciseData {
             }
             Totals = sum;
         }
-
         private void correctLapsFromDataPoints() {
             var tempMin = Laps[0].Totals.Temperature.Min;
             var tempMax = Laps[0].Totals.Temperature.Max;
@@ -170,6 +162,7 @@ namespace HRM_Track_Merger.ExerciseData {
                 lap.Totals = sum;
             }
         }
+
         public void UpdateCaloriesData() {
             Totals.Calories = 0;
             foreach (var lap in Laps) {
@@ -268,7 +261,6 @@ namespace HRM_Track_Merger.ExerciseData {
                 Time = range
             };
         }
-
         internal double calculateCalories(double heartRate, TimeSpan time) {
             /*
              * This calculator is based on the equations (shown below) derived by LR Keytel, 
@@ -298,49 +290,6 @@ namespace HRM_Track_Merger.ExerciseData {
             return result * 60 * time.TotalHours / 4.184;
         }
 
-        private void createSummaryFromPolarTrip(PolarHRM.PolarHRMFile.TripData PolarTrip) {
-            Totals = new Summary() {
-                Altitude = new Range<double>(0, PolarTrip.AvgAltitude, PolarTrip.MaxAltitude),
-                Ascent = PolarTrip.Ascent,
-                Distance = PolarTrip.Distance,
-                Speed = new Range<double>(0, PolarTrip.AvgSpeed, PolarTrip.MaxSpeed),
-            };
-        }
-
-        private void createLapsFromPolarLaps(List<PolarHRM.Lap> PolarLaps) {
-            foreach (var lap in PolarLaps) {
-                if (!DataPointExists(lap.StartTime + lap.Duration)) {
-                    var point = GetDataPointWithInterpolation(lap.StartTime + lap.Duration);
-                    point.Altitude = lap.Altitude;
-                    point.Cadence = lap.Cadence;
-                    point.HeartRate = lap.HR;
-                    point.Power = lap.Power;
-                    point.PowerBalance = 0;
-                    point.Speed = lap.Speed;
-                    InsertDataPoint(point);
-                }
-            }
-            Laps = new List<Lap>(PolarLaps.Count);
-            foreach (var lap in PolarLaps) {
-                Laps.Add(new Lap() {
-                    Totals = new Summary() {
-                        Distance = lap.Distance,
-                        HeartRate = new Range<double>() {
-                            Min = lap.HRmin,
-                            Avg = lap.HRavg,
-                            Max = lap.HRmax
-                        },
-                        Temperature = new Range<double>() {
-                            Min = lap.Temperature,
-                            Avg = lap.Temperature,
-                            Max = lap.Temperature
-                        },
-                        Time = new DateTimeRange(lap.StartTime, lap.Duration),
-                        Note = lap.Note
-                    }
-                });
-            }
-        }
         public bool DataPointExists(DateTime time) {
             return DataPoints.Any(point => point.Time == time);
         }
@@ -370,16 +319,13 @@ namespace HRM_Track_Merger.ExerciseData {
             return point;
         }
 
-        public List<Lap> Laps { get; private set; }
-        public Summary Totals { get; private set; }
-        public List<DataPoint> DataPoints { get; private set; }
-
         public void CalculateDataPointDistances() {
             for (int i = 1; i < DataPoints.Count; ++i) {
                 DataPoints[i].Distance = DataPoints[i - 1].Distance + (DataPoints[i].Speed + DataPoints[i - 1].Speed) / 2
                     * ((DataPoints[i].Time - DataPoints[i - 1].Time).TotalSeconds / 3600);
             }
         }
+
         public void AddGPSData(GPXFile gpxFile, TimeSpan offset) {
             var track = new TrackPointsCollection(gpxFile.GetTrackPoints(offset));
             foreach (var point in DataPoints) {
@@ -401,30 +347,11 @@ namespace HRM_Track_Merger.ExerciseData {
             IsNavigationDataAvailable = true;
         }
 
-        public bool IsCadenceDataAvailable { get; private set; }
-
-        public bool IsAltitudeDataAvailable { get; private set; }
-
-        public bool IsCyclingDataAvailable { get; private set; }
-
-        public bool IsAirPressureDataAvailable { get; private set; }
-
-        public bool IsSpeedDataAvailable { get; private set; }
-
-        public bool IsPowerDataAvailable { get; private set; }
-
-        public bool IsBalanceDataAvailable { get; private set; }
-
-        public bool IsPedallingIndexDataAvailable { get; private set; }
-
-        public bool IsNavigationDataAvailable { get; private set; }
-
         public GarminTCX.TCXFile ConvertToTCX() {
             var tcxFile = new GarminTCX.TCXFile();
             tcxFile.Activities.Add(ConvertToTCXActivity());
             return tcxFile;
         }
-
         public GarminTCX.Activity ConvertToTCXActivity() {
             var activity = new GarminTCX.Activity() {
                 Creator = new GarminTCX.Creator() {
