@@ -19,6 +19,7 @@ namespace HRM_Track_Merger.ExerciseData {
             correctTotalsFromDataPoints();
             UpdateCaloriesData();
             correctTotalsTemperatureFromLaps();
+            CalculateDataPointDistances();
             setDataAvailabilityFields(polarHRM);
             Totals.Note = polarHRM.Note;
         }
