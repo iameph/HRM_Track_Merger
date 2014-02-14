@@ -33,7 +33,9 @@ namespace HRM_Track_Merger.GarminTCX {
             foreach (var act in Activities) {
                 doc.DocumentElement["Activities"].AppendChild(act.GenerateXML(doc));
             }
-            doc.Save(XmlWriter.Create(fileName,ws));
+            using (var writer = XmlWriter.Create(fileName, ws)) {
+                doc.Save(writer);
+            }
             System.Threading.Thread.CurrentThread.CurrentCulture = currentCulture;
         }
         public static string DateTimeToXmlString(DateTime time) {
