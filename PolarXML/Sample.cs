@@ -14,7 +14,7 @@ namespace HRM_Track_Merger.PolarXML {
         private void ParseXmlElement(XmlElement elem) {
             foreach (XmlElement el in elem.ChildNodes) {
                 switch (el.LocalName) {
-                    case "sampleType":
+                    case "type":
                         Enum.TryParse<SampleType>(el.InnerXml,out SampleType);
                         break;
                     case "values":
