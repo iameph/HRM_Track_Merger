@@ -77,6 +77,7 @@
     <Compile Include="TrackPoint.cs" />
     <Compile Include="TrackPointsCollection.cs" />
     <Compile Include="UnknownFileTypeException.cs" />
+    <Compile Include="Utility.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -313,8 +313,7 @@ namespace HRM_Track_Merger.PolarHRM {
         }
 
         public List<HRDataPoint> HRData { get; set; }
-        public const double MILE = 1.609344d;
-        public const double FEET = 0.3048d;
+        
         public List<ExerciseData.DataPoint> GetDataPointsInMetricSystem() {
             var DataPoints = new List<ExerciseData.DataPoint>();
             var time = StartTime;
@@ -336,13 +335,13 @@ namespace HRM_Track_Merger.PolarHRM {
         }
         public double getKilometers(double p) {
             if (IsImperialSystemUsed) {
-                return p * MILE;
+                return Utility.MilesToKilometers(p);
             }
             return p;
         }
         public double getMeters(double p) {
             if (IsImperialSystemUsed) {
-                return p * FEET;
+                return Utility.FeetsToMeters(p);
             }
             return p;
         }
