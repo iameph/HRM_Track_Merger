@@ -8,10 +8,10 @@ namespace HRM_Track_Merger.GarminTCX {
     class TrackPoint {
         public DateTime Time;
         public Position Position;
-        public double AltitudeMeters;
-        public double DistanceMeters;
+        public double? AltitudeMeters;
+        public double? DistanceMeters;
         public HeartRate HeartRateBpm;
-        public byte Cadence;
+        public byte? Cadence;
         public TrackPointExtension Extension;
     }
 }

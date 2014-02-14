@@ -9,7 +9,7 @@ namespace HRM_Track_Merger.GarminTCX {
         public Sport Sport = Sport.Other;
         public DateTime Id;
         public List<Lap> Laps;
-        public string Notes;
+        public string? Notes;
         public Creator Creator;
     }
 }

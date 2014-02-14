@@ -9,15 +9,15 @@ namespace HRM_Track_Merger.GarminTCX {
         public DateTime StartTime;
         public double TotalTimeSeconds;
         public double DistanceMeters;
-        public double MaximumSpeed;
+        public double? MaximumSpeed;
         public uint Calories;
         public HeartRate AverageHeartRateBpm;
         public HeartRate MaximumHeartRateBpm;
         public string Intesity;
-        public byte Cadence;
+        public byte? Cadence;
         public string TriggerMethod;
         public List<TrackPoint> Track;
-        public string Notes;
+        public string? Notes;
         public LapExtension Extension;
     }
 }
