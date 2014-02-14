@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace HRM_Track_Merger.GarminTCX {
-    class Creator {
+    class Creator : ICloneable{
         public string Name;
         public uint UnitID;
         public uint ProductID;
@@ -30,6 +30,10 @@ namespace HRM_Track_Merger.GarminTCX {
                 elem["Version"].AppendChild(doc.CreateElement("BuildMinor", xmlNS)).InnerXml = Version[3].ToString();
             }
             return elem;
+        }
+
+        public object Clone() {
+            return base.MemberwiseClone();
         }
     }
 }
