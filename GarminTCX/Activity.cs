@@ -9,7 +9,23 @@ namespace HRM_Track_Merger.GarminTCX {
         public Sport Sport = Sport.Other;
         public DateTime Id;
         public List<Lap> Laps;
-        public string? Notes;
+        public string Notes;
         public Creator Creator;
+        public System.Xml.XmlNode GenerateXML(System.Xml.XmlDocument doc) {
+            var xmlNS = doc.DocumentElement.NamespaceURI;
+            var actElem = doc.CreateElement("Activity", xmlNS);
+            actElem.SetAttribute("Sport", xmlNS, Sport.ToString());
+            actElem.AppendChild(doc.CreateElement("Id", xmlNS)).InnerXml = TCXFile.DateTimeToXmlString(Id);
+            foreach (var lap in Laps) {
+                actElem.AppendChild(lap.GenerateXML(doc));
+            }
+            if (Notes != null) {
+                actElem.AppendChild(doc.CreateElement("Notes", xmlNS)).InnerXml = Notes;
+            }
+            if (Creator != null) {
+                actElem.AppendChild(Creator.GenerateXML(doc));
+            }
+            return actElem;
+        }
     }
 }
