@@ -49,8 +49,10 @@
     <Compile Include="ExerciseData\Lap.cs" />
     <Compile Include="PolarXML\AltitudeInfo.cs" />
     <Compile Include="PolarXML\EndingValues.cs" />
+    <Compile Include="PolarXML\FloatRange.cs" />
     <Compile Include="PolarXML\Sample.cs" />
     <Compile Include="PolarXML\SampleType.cs" />
+    <Compile Include="PolarXML\ShortRange.cs" />
     <Compile Include="PolarXML\Speed.cs" />
     <Compile Include="PolarXML\SpeedType.cs" />
     <Compile Include="Range.cs" />
