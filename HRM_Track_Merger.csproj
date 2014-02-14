@@ -48,6 +48,16 @@
     <Compile Include="ExerciseData\Lap.cs" />
     <Compile Include="ExerciseData\Range.cs" />
     <Compile Include="ExerciseData\Summary.cs" />
+    <Compile Include="GarminTCX\Activity.cs" />
+    <Compile Include="GarminTCX\Author.cs" />
+    <Compile Include="GarminTCX\Creator.cs" />
+    <Compile Include="GarminTCX\HeartRate.cs" />
+    <Compile Include="GarminTCX\Lap.cs" />
+    <Compile Include="GarminTCX\LapExtension.cs" />
+    <Compile Include="GarminTCX\Position.cs" />
+    <Compile Include="GarminTCX\Sport.cs" />
+    <Compile Include="GarminTCX\TrackPoint.cs" />
+    <Compile Include="GarminTCX\TrackPointExtension.cs" />
     <Compile Include="GPXFile.cs" />
     <Compile Include="HRMParser.cs" />
     <Compile Include="InvalidArgumentsException.cs" />
@@ -63,7 +73,7 @@
     <Compile Include="PolarHRM\UserData.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TCXFile.cs" />
+    <Compile Include="GarminTCX\TCXFile.cs" />
     <Compile Include="TrackPoint.cs" />
     <Compile Include="TrackPointsCollection.cs" />
     <Compile Include="UnknownFileTypeException.cs" />
