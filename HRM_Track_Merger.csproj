@@ -42,6 +42,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommandLineArguments.cs" />
+    <Compile Include="DateTimeRange.cs" />
+    <Compile Include="ExerciseData\CommonExerciseData.cs" />
+    <Compile Include="ExerciseData\DataPoint.cs" />
+    <Compile Include="ExerciseData\Lap.cs" />
+    <Compile Include="ExerciseData\Range.cs" />
+    <Compile Include="ExerciseData\Summary.cs" />
     <Compile Include="GPXFile.cs" />
     <Compile Include="HRMParser.cs" />
     <Compile Include="InvalidArgumentsException.cs" />
