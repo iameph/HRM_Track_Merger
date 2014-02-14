@@ -18,7 +18,7 @@ namespace HRM_Track_Merger.GarminTCX {
             attr.Value = "Device_t";
             elem.SetAttributeNode(attr);
             elem.AppendChild(doc.CreateElement("Name", xmlNS)).InnerXml = Name;
-            elem.AppendChild(doc.CreateElement("UnitID", xmlNS)).InnerXml = UnitID.ToString();
+            elem.AppendChild(doc.CreateElement("UnitId", xmlNS)).InnerXml = UnitID.ToString();
             elem.AppendChild(doc.CreateElement("ProductID", xmlNS)).InnerXml = ProductID.ToString();
             elem.AppendChild(doc.CreateElement("Version", xmlNS));
             elem["Version"].AppendChild(doc.CreateElement("VersionMajor", xmlNS)).InnerXml = Version[0].ToString();

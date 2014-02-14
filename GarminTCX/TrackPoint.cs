@@ -17,7 +17,7 @@ namespace HRM_Track_Merger.GarminTCX {
 
         public System.Xml.XmlNode GenerateXML(System.Xml.XmlDocument doc) {
             var xmlNS = doc.DocumentElement.NamespaceURI;
-            var elem = doc.CreateElement("TrackPoint", xmlNS);
+            var elem = doc.CreateElement("Trackpoint", xmlNS);
             elem.AppendChild(doc.CreateElement("Time", xmlNS)).InnerXml = TCXFile.DateTimeToXmlString(Time);
             if (Position != null) {
                 elem.AppendChild(Position.GenerateXML(doc));
