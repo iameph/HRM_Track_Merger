@@ -61,7 +61,6 @@
     <Compile Include="GarminTCX\TrackPoint.cs" />
     <Compile Include="GarminTCX\TrackPointExtension.cs" />
     <Compile Include="GPXFile.cs" />
-    <Compile Include="HRMParser.cs" />
     <Compile Include="InvalidArgumentsException.cs" />
     <Compile Include="InvalidFileFormatException.cs" />
     <Compile Include="PolarHRM\HRDataPoint.cs" />
