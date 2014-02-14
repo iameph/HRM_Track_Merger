@@ -19,6 +19,11 @@ namespace HRM_Track_Merger.GarminTCX {
             Activities = new List<Activity>();
         }
         public void Save(string fileName) {
+            Save(fileName, new XmlWriterSettings() { 
+                Indent=true
+            });
+        }
+        public void Save(string fileName, XmlWriterSettings ws) {
             var currentCulture = System.Threading.Thread.CurrentThread.CurrentCulture;
             System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
 
@@ -28,11 +33,9 @@ namespace HRM_Track_Merger.GarminTCX {
             foreach (var act in Activities) {
                 doc.DocumentElement["Activities"].AppendChild(act.GenerateXML(doc));
             }
-            doc.Save(fileName);
-
+            doc.Save(XmlWriter.Create(fileName,ws));
             System.Threading.Thread.CurrentThread.CurrentCulture = currentCulture;
         }
-
         public static string DateTimeToXmlString(DateTime time) {
             return time.ToUniversalTime().ToString("s") + String.Format(".{0,3:D3}", time.Millisecond) + "Z";
         }
@@ -40,5 +43,10 @@ namespace HRM_Track_Merger.GarminTCX {
         public List<Activity> Activities { get { return activities; } protected set { activities = value; } }
         private Author author;
         public Author Author { get { return author; } protected set { author = value; } }
+        public void SetSport(int idx, Sport sport) {
+            if (Activities != null && Activities.Count > idx) {
+                Activities[idx].Sport = sport;
+            }
+        }
     }
 }
