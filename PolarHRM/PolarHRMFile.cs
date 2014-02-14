@@ -297,21 +297,91 @@ namespace HRM_Track_Merger.PolarHRM {
         public class TripData {
             public double Distance { get; set; }
 
-            public int Ascent { get; set; }
+            public double Ascent { get; set; }
 
             public TimeSpan TotalTime { get; set; }
 
-            public int AvgAltitude { get; set; }
+            public double AvgAltitude { get; set; }
 
-            public int MaxAltitude { get; set; }
+            public double MaxAltitude { get; set; }
 
             public double AvgSpeed { get; set; }
 
             public double MaxSpeed { get; set; }
 
-            public int Odometer { get; set; }
+            public double Odometer { get; set; }
         }
 
         public List<HRDataPoint> HRData { get; set; }
+        public const double MILE = 1.609344d;
+        public const double FEET = 0.3048d;
+        public List<ExerciseData.DataPoint> GetDataPointsInMetricSystem() {
+            var DataPoints = new List<ExerciseData.DataPoint>();
+            var time = StartTime;
+            foreach (var point in HRData) {
+                DataPoints.Add(new ExerciseData.DataPoint() { 
+                    Time = time,
+                    HeartRate = point.HeartRate,
+                    Speed = getKilometers(point.Speed),
+                    Cadence = point.Cadence,
+                    Altitude = getMeters(point.Altitude),
+                    Power = point.Power,
+                    PowerBalance = point.PowerBalance,
+                    AirPressure = point.AirPressure,
+                    Distance = getKilometers(point.Distance)
+                });
+                time += Interval;
+            }
+            return DataPoints;
+        }
+        public double getKilometers(double p) {
+            if (IsImperialSystemUsed) {
+                return p * MILE;
+            }
+            return p;
+        }
+        public double getMeters(double p) {
+            if (IsImperialSystemUsed) {
+                return p * FEET;
+            }
+            return p;
+        }
+
+        public TripData GetTripDataInMetricSystem() {
+            return new TripData() {
+                Distance = getKilometers(Trip.Distance),
+                Ascent = getMeters(Trip.Ascent),
+                TotalTime = Trip.TotalTime,
+                AvgAltitude = getMeters(Trip.AvgAltitude),
+                AvgSpeed = getKilometers(Trip.AvgSpeed),
+                MaxSpeed = getKilometers(Trip.MaxSpeed),
+                Odometer = getKilometers(Trip.Odometer)
+            };
+        }
+
+        public List<Lap> GetLapsInMetricSystem() {
+            var laps = new List<Lap>();
+            foreach (var lap in Laps) {
+                laps.Add(new Lap() { 
+                    Time = lap.Time,
+                    StartTime = lap.StartTime,
+                    Duration = lap.Duration,
+                    HR = lap.HR,
+                    HRavg = lap.HRavg,
+                    HRmax = lap.HRmax,
+                    HRmin = lap.HRmin,
+                    Speed = getKilometers(lap.Speed),
+                    Cadence = lap.Cadence,
+                    Altitude = getMeters(lap.Altitude),
+                    Ascend = getMeters(lap.Ascend),
+                    Distance = getKilometers(lap.Distance),
+                    Power = lap.Power,
+                    Temperature = lap.Temperature,
+                    Note = lap.Note,
+                    AutomaticLap = lap.AutomaticLap
+                });
+            }
+            return laps;
+        }
     }
 }
