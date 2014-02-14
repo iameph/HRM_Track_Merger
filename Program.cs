@@ -31,8 +31,8 @@ namespace HRM_Track_Merger {
                     throw new Exception("No HRM file in arguments or file doesn't exist");
                 }
                 Settings settings;
-                if (File.Exists("settings.cfg")) {
-                    settings = new Settings("settings.cfg");
+                if (File.Exists(AssemblyDirectory+@"\settings.cfg")) {
+                    settings = new Settings(AssemblyDirectory + @"\settings.cfg");
                 }
                 else {
                     settings = Settings.Default;
@@ -103,7 +103,7 @@ namespace HRM_Track_Merger {
                 tcxFile.Save(outputFileName, new System.Xml.XmlWriterSettings() { Indent = true, IndentChars = "\t" });
             }
             catch (Exception e) {
-                Console.WriteLine(e.Message);
+                Console.WriteLine("Something bad happened. Please contact author. Error message: "+e.Message);
                 return 1;
             }
             return 0;
@@ -201,6 +201,14 @@ namespace HRM_Track_Merger {
         public static string CreateCorrectedFilename(string fileName, string add) {
             var info = new FileInfo(fileName);
             return info.DirectoryName + (info.DirectoryName.EndsWith("\\") ? "" : "\\") + Path.GetFileNameWithoutExtension(info.Name) + add + info.Extension;
+        }
+        static public string AssemblyDirectory {
+            get {
+                string codeBase = System.Reflection.Assembly.GetExecutingAssembly().CodeBase;
+                UriBuilder uri = new UriBuilder(codeBase);
+                string path = Uri.UnescapeDataString(uri.Path);
+                return Path.GetDirectoryName(path);
+            }
         }
     }
 }
