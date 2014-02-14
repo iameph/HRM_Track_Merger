@@ -23,30 +23,24 @@ namespace HRM_Track_Merger.GarminTCX {
             var xmlNS = doc.DocumentElement.NamespaceURI;
             var lapElem = doc.CreateElement("Lap", xmlNS);
             lapElem.SetAttribute("StartTime", TCXFile.DateTimeToXmlString(StartTime));
-            lapElem.AppendChild(doc.CreateElement("TotalTimeSeconds", xmlNS));
-            lapElem["TotalTimeSeconds"].InnerXml = TotalTimeSeconds.ToString();
+            lapElem.AppendChild(doc.CreateElement("TotalTimeSeconds", xmlNS)).InnerXml = TotalTimeSeconds.ToString();;
             lapElem.AppendChild(doc.CreateElement("DistanceMeters", xmlNS));
             lapElem["DistanceMeters"].InnerXml = DistanceMeters.ToString();
             if (MaximumSpeed != null) {
-                lapElem.AppendChild(doc.CreateElement("MaximumSpeed", xmlNS));
-                lapElem["MaximumSpeed"].InnerXml = MaximumSpeed.ToString();
+                lapElem.AppendChild(doc.CreateElement("MaximumSpeed", xmlNS)).InnerXml = MaximumSpeed.ToString();;
             }
-            lapElem.AppendChild(doc.CreateElement("Calories", xmlNS));
-            lapElem["Calories"].InnerXml = Calories.ToString();
+            lapElem.AppendChild(doc.CreateElement("Calories", xmlNS)).InnerXml = Calories.ToString();;
             if (AverageHeartRateBpm != null) {
                 lapElem.AppendChild(AverageHeartRateBpm.GenerateXML(doc, "AverageHeartRateBpm"));
             }
             if (MaximumHeartRateBpm != null) {
                 lapElem.AppendChild(MaximumHeartRateBpm.GenerateXML(doc, "MaximumHeartRateBpm"));
             }
-            lapElem.AppendChild(doc.CreateElement("Intensity", xmlNS));
-            lapElem["Intensity"].InnerXml = Intensity;
+            lapElem.AppendChild(doc.CreateElement("Intensity", xmlNS)).InnerXml = Intensity;;
             if (Cadence != null) {
-                lapElem.AppendChild(doc.CreateElement("Cadence", xmlNS));
-                lapElem["Cadence"].InnerXml = Cadence.ToString();
+                lapElem.AppendChild(doc.CreateElement("Cadence", xmlNS)).InnerXml = Cadence.ToString();;
             }
-            lapElem.AppendChild(doc.CreateElement("TriggerMethod", xmlNS));
-            lapElem["TriggerMethod"].InnerXml = TriggerMethod;
+            lapElem.AppendChild(doc.CreateElement("TriggerMethod", xmlNS)).InnerXml = TriggerMethod;;
             if (Track != null) {
                 lapElem.AppendChild(doc.CreateElement("Track", xmlNS));
                 foreach (var trkPoint in Track) {
@@ -54,8 +48,10 @@ namespace HRM_Track_Merger.GarminTCX {
                 }
             }
             if (Notes != null) {
-                lapElem.AppendChild(doc.CreateElement("Notes", xmlNS));
-                lapElem["Notes"].InnerXml = Notes.Trim();
+                var note = Notes.Trim();
+                if (note != "") {
+                    lapElem.AppendChild(doc.CreateElement("Notes", xmlNS)).InnerXml = Notes.Trim();
+                }
             }
             if (Extension != null) {
                 lapElem.AppendChild(Extension.GenerateXML(doc));
