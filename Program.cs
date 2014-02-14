@@ -6,35 +6,10 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-[assembly: InternalsVisibleTo("HRM_Track_Merger.Test")]
-
 namespace HRM_Track_Merger {
     class Program {
         static int Main(string[] args) {
-            CommandLineArguments Arguments;
-            try {
-                Arguments = CommandLineArguments.Parse(args);
-            }
-            catch (InvalidArgumentsException e) {
-                Console.WriteLine(e.Message);
-                ShowUsageInfo();
-                return 0;
-            }
-            Arguments.FixTimeForTCXCreator();
-            PrintInputArguments(Arguments);
-
-            var gpxFile = new GPXFile(Arguments.FileName);
-            var trackPoints = new TrackPointsCollection(gpxFile.GetTrackPoints(Arguments.Offset));
-            Arguments.SetDateForStartTime(trackPoints.TrackPoints[0].time);
-
-            var newGPXFile = new GPXFile();
-            newGPXFile.CreateNewSegment();
-
-            for (DateTime curTime = Arguments.StartTime; curTime <= Arguments.StartTime + Arguments.Duration; curTime = curTime.Add(Arguments.Step)) {
-                newGPXFile.AddTrackPoint(trackPoints.GetTrackPointAtTime(curTime));
-            }
-
-            newGPXFile.File.Save(CreateCorrectedFilename(Arguments.FileName));
+            var hrmFile = PolarHRM.PolarHRMFile.Parse(@".\..\..\Samples\sample.hrm");
             return 0;
         }
 
@@ -59,9 +34,12 @@ namespace HRM_Track_Merger {
         private static void PrintInputArguments(CommandLineArguments args) {
             PrintInputArguments(args.Offset, args.StartTime, args.Duration, args.Step);
         }
-
         private static string CreateCorrectedFilename(string fileName) {
-            return Path.GetDirectoryName(fileName) + Path.GetFileNameWithoutExtension(fileName) + "_corrected" + Path.GetExtension(fileName);
+            return CreateCorrectedFilename(fileName, "_corrected");
+        }
+        public static string CreateCorrectedFilename(string fileName, string add) {
+            var info = new FileInfo(fileName);
+            return info.DirectoryName + (info.DirectoryName.EndsWith("\\") ? "" : "\\") + Path.GetFileNameWithoutExtension(info.Name) + add + info.Extension;
         }
     }
 }
