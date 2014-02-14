@@ -32,8 +32,6 @@ namespace HRM_Track_Merger {
                 if (cmdArgs.HRMFileName == null) {
                     throw new Exception("No HRM file in arguments or file doesn't exist");
                 }
-                var hrmFile = PolarHRM.PolarHRMFile.Parse(cmdArgs.HRMFileName);
-                var exercise = new ExerciseData.CommonExerciseData(hrmFile);
                 Settings settings;
                 if (File.Exists("settings.cfg")) {
                     settings = new Settings("settings.cfg");
@@ -41,18 +39,43 @@ namespace HRM_Track_Merger {
                 else {
                     settings = Settings.Default;
                 }
-                exercise.UpdateUserData(settings.GetUserData(exercise.Totals.Time.Start), true);
-                exercise.UpdateUserData(ParseUserOptions(cmdArgs.GetOptions()), false);
+
+                ExerciseData.IExerciseCollection hrmFile;
+                switch (Path.GetExtension(cmdArgs.HRMFileName)) {
+                    case ".hrm":
+                        hrmFile = PolarHRM.PolarHRMFile.Parse(cmdArgs.HRMFileName);
+                        break;
+                    case ".xml":
+                        hrmFile = new PolarXML.PolarXMLFile(cmdArgs.HRMFileName);
+                        break;
+                    default:
+                        throw new UnknownFileTypeException();
+                }
+                List<ExerciseData.CommonExerciseData> exercises = new List<ExerciseData.CommonExerciseData>();
+                foreach (var ex in hrmFile.GetExercises()) {
+                    exercises.Add(new ExerciseData.CommonExerciseData(ex));
+                }
+                foreach (var ex in exercises) {
+                    ex.UpdateUserData(settings.GetUserData(ex.Totals.Time.Start), true);
+                    ex.UpdateUserData(ParseUserOptions(cmdArgs.GetOptions()), false);
+                }
 
                 if (cmdArgs.GPSFileName != null) {
                     TimeSpan offset = TimeSpan.Zero;
                     if (cmdArgs.GetOptions().ContainsKey("offset")) {
                         offset = new TimeSpan(0, 0, Int32.Parse(cmdArgs.GetOptions()["offset"]));
                     }
-                    exercise.AddGPSData(new GPXFile(cmdArgs.GPSFileName), offset);
+                    foreach (var ex in exercises) {
+                        ex.AddGPSData(new GPXFile(cmdArgs.GPSFileName), offset);
+                    }
                 }
-                exercise.UpdateCaloriesData();
-                var tcxFile = exercise.ConvertToTCX();
+                foreach (var ex in exercises) {
+                    ex.UpdateCaloriesData();
+                }
+                var tcxFile = new GarminTCX.TCXFile();
+                foreach (var ex in exercises) {
+                    tcxFile.Activities.Add(ex.ConvertToTCXActivity());
+                }
                 GarminTCX.Sport sport = GarminTCX.Sport.Other;
                 if (settings.Sport != null) {
                     Enum.TryParse<GarminTCX.Sport>(settings.Sport, true, out sport);
@@ -63,7 +86,7 @@ namespace HRM_Track_Merger {
                         sport = GarminTCX.Sport.Other;
                     }
                 }
-                tcxFile.SetSport(0, sport);
+                tcxFile.SetSport(sport);
                 if (settings.Device != null) {
                     foreach (var act in tcxFile.Activities) {
                         act.Creator = settings.Device;
