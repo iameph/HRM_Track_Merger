@@ -230,28 +230,9 @@ namespace HRM_Track_Merger.ExerciseData {
                 point.Time = time;
             }
             else {
-                point = InterpolateDataPoint(DataPoints[idx - 1], DataPoints[idx], time);
+                point = DataPoint.Interpolate(DataPoints[idx - 1], DataPoints[idx], time);
             }
             return point;
-        }
-
-        private DataPoint InterpolateDataPoint(DataPoint dataPoint1, DataPoint dataPoint2, DateTime time) {
-            double x1 = 0;
-            double x2 = (dataPoint2.Time - dataPoint1.Time).TotalSeconds;
-            double x = (time - dataPoint1.Time).TotalSeconds;
-            return new DataPoint() {
-                AirPressure = Interpolate(x1, x2, dataPoint1.AirPressure, dataPoint2.AirPressure, x),
-                Altitude = Interpolate(x1, x2, dataPoint1.Altitude, dataPoint2.Altitude, x),
-                Cadence = Interpolate(x1, x2, dataPoint1.Cadence, dataPoint2.Cadence, x),
-                Distance = Interpolate(x1, x2, dataPoint1.Distance, dataPoint2.Distance, x),
-                HeartRate = Interpolate(x1, x2, dataPoint1.HeartRate, dataPoint2.HeartRate, x),
-                Latitude = Interpolate(x1, x2, dataPoint1.Latitude, dataPoint2.Latitude, x),
-                Longitude = Interpolate(x1, x2, dataPoint1.Longitude, dataPoint2.Longitude, x),
-                Power = Interpolate(x1, x2, dataPoint1.Power, dataPoint2.Power, x),
-                PowerBalance = Interpolate(x1, x2, dataPoint1.PowerBalance, dataPoint2.PowerBalance, x),
-                Speed = Interpolate(x1, x2, dataPoint1.Speed, dataPoint2.Speed, x),
-                Time = time
-            };
         }
 
         public List<Lap> Laps { get; private set; }
@@ -264,14 +245,24 @@ namespace HRM_Track_Merger.ExerciseData {
                     * ((DataPoints[i].Time - DataPoints[i - 1].Time).TotalSeconds / 3600);
             }
         }
-        public static double Interpolate(double x1, double x2, double y1, double y2, double x) {
-            if (x <= x1) {
-                return y1;
+        public void AddGPSData(GPXFile gpxFile , TimeSpan offset) {
+            var track = new TrackPointsCollection(gpxFile.GetTrackPoints(offset));
+            foreach (var point in DataPoints) {
+                var tPoint = track.GetTrackPointAtTime(point.Time);
+                point.Latitude = tPoint.latitude;
+                point.Longitude = tPoint.longitude;
             }
-            if (x >= x2) {
-                return y2;
+            var trackPointInRange = track.TrackPoints.FindAll(
+                point => point.time >= Totals.Time.Start && point.time <= Totals.Time.End);
+            var pointsToAdd = new List<DataPoint>();
+            foreach (var point in trackPointInRange) {
+                if (DataPointExists(point.time)) continue;
+                var dataPoint = GetDataPointWithInterpolation(point.time);
+                dataPoint.Longitude = point.longitude;
+                dataPoint.Latitude = point.latitude;
+                pointsToAdd.Add(dataPoint);
             }
-            return (x - x1) * (y2 - y1) / (x2 - x1) + y1;
+            pointsToAdd.ForEach(point => InsertDataPoint(point));
         }
 
         public bool IsCadenceDataAvailable { get; private set; }
