@@ -6,6 +6,8 @@ using System.Xml;
 namespace HRM_Track_Merger {
     class GPXFile {
         private XmlElement _currSegment;
+        private bool isPolarStupidGPX = false;
+        private string nameSpace = "";
         private string defaultXML = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>" +
             "<gpx version=\"1.0\" creator=\"Polar ProTrainer 5 - www.polar.fi\" " +
             "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.topografix.com/GPX/1/0\" " +
@@ -14,11 +16,18 @@ namespace HRM_Track_Merger {
         public GPXFile(string filename) {
             File = new XmlDocument();
             File.Load(filename);
+            nameSpace = File.DocumentElement.NamespaceURI;
+            if (File.DocumentElement.GetAttribute("version", nameSpace) == "1.0" &&
+                File.DocumentElement.GetAttribute("creator", nameSpace) == "Polar ProTrainer 5 - www.polar.fi" &&
+                File.DocumentElement.GetAttribute("xmlns", nameSpace) == "http://www.topografix.com/GPX/1/0") {
+                    isPolarStupidGPX = true;
+            }
             _currSegment = null;
         }
         public GPXFile() {
             File = new XmlDocument();
             File.LoadXml(defaultXML);
+            isPolarStupidGPX = true;
             _currSegment = null;
         }
         public XmlDocument File { get; private set; }
@@ -55,7 +64,10 @@ namespace HRM_Track_Merger {
                 point.latitude = Double.Parse(lat.Value, format);
                 point.longitude = Double.Parse(lon.Value, format);
                 point.time = DateTime.Parse(time.InnerText);
-                point.time.Add(offset);
+                if (isPolarStupidGPX) {
+                    point.time -= TimeZoneInfo.Local.BaseUtcOffset;
+                }
+                point.time += offset;
                 if (elevationElement != null) {
                     point.elevation = Double.Parse(elevationElement.InnerText, format);
                 }
@@ -82,6 +94,9 @@ namespace HRM_Track_Merger {
             lat.Value = XmlConvert.ToString(point.latitude);
             lon.Value = XmlConvert.ToString(point.longitude);
             var xmlTime = point.time.ToUniversalTime();
+            if (isPolarStupidGPX) {
+                xmlTime += TimeZoneInfo.Local.BaseUtcOffset;
+            }
             time.InnerText = String.Format("{0}-{1:D2}-{2:D2}T{3:D2}:{4:D2}:{5:D2}Z", xmlTime.Year, xmlTime.Month, xmlTime.Day, xmlTime.Hour, xmlTime.Minute, xmlTime.Second);
             trk.Attributes.Append(lat);
             trk.Attributes.Append(lon);
