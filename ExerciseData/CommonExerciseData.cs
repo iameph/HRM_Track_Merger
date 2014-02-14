@@ -29,8 +29,8 @@ namespace HRM_Track_Merger.ExerciseData {
                 UserData = new UserData();
             }
             replaceValue(ref UserData.Age, ref data.Age, currentDataHasPriority);
-            if (data.Gender != null && !(currentDataHasPriority && UserData.Gender != null)) {
-                UserData.Gender = data.Gender;
+            if (data.Sex != null && !(currentDataHasPriority && UserData.Sex != null)) {
+                UserData.Sex = data.Sex;
             }
             replaceValue(ref UserData.MaxHR, ref data.MaxHR, currentDataHasPriority);
             replaceValue(ref UserData.RestHR, ref data.RestHR, currentDataHasPriority);
@@ -222,12 +222,12 @@ namespace HRM_Track_Merger.ExerciseData {
              * JH Goedecke, TD Noakes, H Hiiloskorpi, R Laukkanen, L van der Merwe, and EV Lambert 
              * for their study titled "Prediction of energy expenditure from heart rate monitoring during submaximal exercise."
              */
-            if (UserData.Age == null || UserData.Gender == null || UserData.Weight == null)
+            if (UserData.Age == null || UserData.Sex == null || UserData.Weight == null)
                 return 0;
 
             double result = 0;
             if (UserData.VO2Max != null && UserData.VO2Max != 0) {
-                if (UserData.Gender == Gender.Male) {
+                if (UserData.Sex == Sex.Male) {
                     result = (0.634 * heartRate + 0.404 * UserData.VO2Max.Value + 0.394 * UserData.Weight.Value + 0.271 * UserData.Age.Value - 95.7735);
                 }
                 else {
@@ -235,7 +235,7 @@ namespace HRM_Track_Merger.ExerciseData {
                 }
             }
             else {
-                if (UserData.Gender == Gender.Male) {
+                if (UserData.Sex == Sex.Male) {
                     result = (0.6303 * heartRate + 0.1988 * UserData.Weight.Value + 0.2017 * UserData.Age.Value - 55.0969);
                 }
                 else {
@@ -387,7 +387,7 @@ namespace HRM_Track_Merger.ExerciseData {
                     StartTime = lap.Totals.Time.Start,
                     TotalTimeSeconds = lap.Totals.Time.Duration.TotalSeconds,
                     DistanceMeters = lap.Totals.Distance * 1000,
-                    Calories = (byte)lap.Totals.Calories,
+                    Calories = Utility.RoundUInt(lap.Totals.Calories),
                     Intensity = "Active",
                     TriggerMethod = "Manual",
                     Notes = lap.Totals.Note,
