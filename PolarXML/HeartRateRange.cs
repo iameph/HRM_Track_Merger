@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Xml;
 
 namespace HRM_Track_Merger.PolarXML {
-    class HeartRateRange {
+    class HeartRateRange : ICloneable {
         public HeartRateRange() { }
         public HeartRateRange(XmlElement elem) {
             ParseXmlElement(elem);
@@ -47,5 +47,9 @@ namespace HRM_Track_Merger.PolarXML {
         public byte? Maximum;
         //<xs:element name="ending" minOccurs="0">
         public byte? Ending;
+
+        public object Clone() {
+            return base.MemberwiseClone();
+        }
     }
 }
