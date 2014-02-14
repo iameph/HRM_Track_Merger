@@ -17,11 +17,12 @@ namespace HRM_Track_Merger.ExerciseData {
             correctTotalsFromDataPoints();
             correctTotalsTemperatureFromLaps();
             setDataAvailabilityFields(polarHRM);
+            Totals.Note = polarHRM.Note;
         }
 
         private void setDataAvailabilityFields(PolarHRM.PolarHRMFile polarHRM) {
             IsAirPressureDataAvailable = polarHRM.IsAirPressureDataAvailable;
-            IsAltitudeDataAvailable = polarHRM.IsAirPressureDataAvailable;
+            IsAltitudeDataAvailable = polarHRM.IsAltitudeDataAvailable;
             IsBalanceDataAvailable = polarHRM.IsBalanceDataAvailable;
             IsCadenceDataAvailable = polarHRM.IsCadenceDataAvailable;
             IsCyclingDataAvailable = polarHRM.IsCyclingDataAvailable;
@@ -201,7 +202,8 @@ namespace HRM_Track_Merger.ExerciseData {
                             Avg = lap.Temperature,
                             Max = lap.Temperature
                         },
-                        Time = new DateTimeRange(lap.StartTime, lap.Duration)
+                        Time = new DateTimeRange(lap.StartTime, lap.Duration),
+                        Note = lap.Note
                     }
                 });
             }
@@ -245,7 +247,7 @@ namespace HRM_Track_Merger.ExerciseData {
                     * ((DataPoints[i].Time - DataPoints[i - 1].Time).TotalSeconds / 3600);
             }
         }
-        public void AddGPSData(GPXFile gpxFile , TimeSpan offset) {
+        public void AddGPSData(GPXFile gpxFile, TimeSpan offset) {
             var track = new TrackPointsCollection(gpxFile.GetTrackPoints(offset));
             foreach (var point in DataPoints) {
                 var tPoint = track.GetTrackPointAtTime(point.Time);
@@ -263,6 +265,7 @@ namespace HRM_Track_Merger.ExerciseData {
                 pointsToAdd.Add(dataPoint);
             }
             pointsToAdd.ForEach(point => InsertDataPoint(point));
+            IsNavigationDataAvailable = true;
         }
 
         public bool IsCadenceDataAvailable { get; private set; }
@@ -280,5 +283,91 @@ namespace HRM_Track_Merger.ExerciseData {
         public bool IsBalanceDataAvailable { get; private set; }
 
         public bool IsPedallingIndexDataAvailable { get; private set; }
+
+        public bool IsNavigationDataAvailable { get; private set; }
+
+        public GarminTCX.TCXFile ConvertToTCX() {
+
+            var tcxFile = new GarminTCX.TCXFile();
+            var activity = new GarminTCX.Activity() {
+                Creator = new GarminTCX.Creator() {
+                    Name = "Unknown Device",
+                    ProductID = 0,
+                    UnitID = 0,
+                    Version = new uint[] { 0, 0, 0, 0 }
+                },
+                Id = Totals.Time.Start,
+                Laps = new List<GarminTCX.Lap>(Laps.Count),
+                Notes = Totals.Note,
+                Sport = GarminTCX.Sport.Other,
+            };
+            tcxFile.Activities.Add(activity);
+            foreach (var lap in Laps) {
+                var tcxLap = new GarminTCX.Lap() {
+                    StartTime = lap.Totals.Time.Start,
+                    TotalTimeSeconds = lap.Totals.Time.Duration.TotalSeconds,
+                    DistanceMeters = lap.Totals.Distance * 1000,
+                    Calories = (byte)lap.Totals.Calories,
+                    Intensity = "Active",
+                    TriggerMethod = "Manual",
+                    Notes = lap.Totals.Note,
+                    AverageHeartRateBpm = new GarminTCX.HeartRate(Utility.RoundByte(lap.Totals.HeartRate.Avg)),
+                    MaximumHeartRateBpm = new GarminTCX.HeartRate(Utility.RoundByte(lap.Totals.HeartRate.Max)),
+                    Track = new List<GarminTCX.TrackPoint>()
+                };
+                if (IsCadenceDataAvailable || IsPowerDataAvailable || IsSpeedDataAvailable) {
+                    if (tcxLap.Extension == null) {
+                        tcxLap.Extension = new GarminTCX.LapExtension();
+                    }
+                }
+                if (IsCadenceDataAvailable) {
+                    tcxLap.Cadence = Utility.RoundByte(lap.Totals.Cadence.Avg);
+                    tcxLap.Extension.MaxBikeCadence = Utility.RoundUInt(lap.Totals.Cadence.Max);
+                }
+                if (IsPowerDataAvailable) {
+                    tcxLap.Extension.AvgWatts = Utility.RoundUInt(lap.Totals.Power.Avg);
+                    tcxLap.Extension.MaxWatts = Utility.RoundUInt(lap.Totals.Power.Max);
+                }
+                if (IsSpeedDataAvailable) {
+                    tcxLap.MaximumSpeed = Utility.KMHToMPS(lap.Totals.Speed.Max);
+                    tcxLap.Extension.AvgSpeed = Utility.KMHToMPS(lap.Totals.Speed.Avg);
+                }
+                foreach (var trkPoint in DataPoints.FindAll(point => (
+                    point.Time >= lap.Totals.Time.Start 
+                    && (point.Time < lap.Totals.Time.End 
+                        || (lap==Laps.Last() && point.Time == lap.Totals.Time.End)
+                    )
+                    ))) {
+
+                        var tcxPoint = new GarminTCX.TrackPoint() {
+                            Time = trkPoint.Time,
+                            HeartRateBpm = new GarminTCX.HeartRate(Utility.RoundByte(trkPoint.HeartRate)),
+                        };
+                        if (IsPowerDataAvailable || IsSpeedDataAvailable) {
+                            tcxPoint.Extension = new GarminTCX.TrackPointExtension();
+                        }
+                        if (IsAltitudeDataAvailable) {
+                            tcxPoint.AltitudeMeters = trkPoint.Altitude;
+                        }
+                        if (IsCadenceDataAvailable) {
+                            tcxPoint.Cadence = Utility.RoundByte(trkPoint.Cadence);
+                        }
+                        if (IsNavigationDataAvailable) {
+                            tcxPoint.Position = new GarminTCX.Position(trkPoint.Latitude, trkPoint.Longitude);
+                        }
+                        if (IsPowerDataAvailable) {
+                            tcxPoint.Extension.Watts = Utility.RoundUInt(trkPoint.Power);
+                        }
+                        if (IsSpeedDataAvailable) {
+                            tcxPoint.DistanceMeters = trkPoint.Distance * 1000;
+                            tcxPoint.Extension.Speed = Utility.KMHToMPS(trkPoint.Speed);
+                        }
+                        tcxLap.Track.Add(tcxPoint);
+                }
+
+                activity.Laps.Add(tcxLap);
+            }
+            return tcxFile;
+        }
     }
 }

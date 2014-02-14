@@ -16,5 +16,6 @@ namespace HRM_Track_Merger.ExerciseData {
         public double Ascent;
         public double Distance;
         public double Calories;
+        public string Note;
     }
 }
