@@ -45,11 +45,13 @@
     <Compile Include="DateTimeRange.cs" />
     <Compile Include="ExerciseData\CommonExerciseData.cs" />
     <Compile Include="ExerciseData\DataPoint.cs" />
+    <Compile Include="ExerciseData\IExerciseCollection.cs" />
     <Compile Include="ExerciseData\Sex.cs" />
     <Compile Include="ExerciseData\Lap.cs" />
     <Compile Include="PolarXML\AltitudeInfo.cs" />
     <Compile Include="PolarXML\EndingValues.cs" />
     <Compile Include="PolarXML\FloatRange.cs" />
+    <Compile Include="ExerciseData\IExercise.cs" />
     <Compile Include="PolarXML\Sample.cs" />
     <Compile Include="PolarXML\SampleType.cs" />
     <Compile Include="PolarXML\ShortRange.cs" />
