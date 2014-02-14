@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace HRM_Track_Merger.ExerciseData {
     class CommonExerciseData {
-        public CommonExerciseData(PolarHRM.PolarHRMFile polarHRM) {
+        public UserData UserData { get; private set; }
+        public CommonExerciseData(PolarHRM.PolarHRMFile polarHRM, UserData userData) {
+            UserData = createUserData(polarHRM);
+            loadUserData(userData);
             DataPoints = polarHRM.GetDataPointsInMetricSystem();
             var PolarTrip = polarHRM.GetTripDataInMetricSystem();
             var PolarLaps = polarHRM.GetLapsInMetricSystem();
@@ -18,6 +21,44 @@ namespace HRM_Track_Merger.ExerciseData {
             correctTotalsTemperatureFromLaps();
             setDataAvailabilityFields(polarHRM);
             Totals.Note = polarHRM.Note;
+
+        }
+
+        private void loadUserData(ExerciseData.UserData data) {
+            if (data == null) return;
+            if (UserData == null) {
+                UserData = new UserData();
+            }
+            if (data.Age != null && data.Age != 0  && (UserData.Age == null || UserData.Age == 0)) {
+                UserData.Age = data.Age;
+            }
+            if (data.Gender != null && UserData.Gender == null ) {
+                UserData.Gender = data.Gender;
+            }
+            if (data.MaxHR != null && data.MaxHR != 0 && (UserData.MaxHR == null || UserData.MaxHR == 0)) {
+                UserData.MaxHR = data.MaxHR;
+            }
+            if (data.RestHR != null && data.RestHR != 0 && (UserData.RestHR == null || UserData.RestHR == 0)) {
+                UserData.RestHR = data.RestHR;
+            }
+            if (data.VO2Max != null && data.VO2Max != 0 && (UserData.VO2Max == null || UserData.VO2Max == 0)) {
+                UserData.VO2Max = data.VO2Max;
+            }
+            if (data.Weight != null && data.Weight != 0 && (UserData.Weight == null || UserData.Weight == 0)) {
+                UserData.Weight = data.Weight;
+            }
+        }
+        public CommonExerciseData(PolarHRM.PolarHRMFile polarHRM)
+            : this(polarHRM, null) { }
+        private ExerciseData.UserData createUserData(PolarHRM.PolarHRMFile polarHRM) {
+            var data = new UserData() {
+                Age = polarHRM.UserSettings.Age,
+                MaxHR = polarHRM.UserSettings.MaxHR,
+                RestHR = polarHRM.UserSettings.RestHR,
+                VO2Max = polarHRM.UserSettings.VO2Max,
+                Weight = polarHRM.UserSettings.Weight
+            };
+            return data;
         }
 
         private void setDataAvailabilityFields(PolarHRM.PolarHRMFile polarHRM) {
@@ -121,7 +162,7 @@ namespace HRM_Track_Merger.ExerciseData {
                     speedTime += timeDiff;
                 }
 
-                calories += calculateCalories((points[i].HeartRate + points[i - 1].HeartRate) * timeDiff / 2, timeDiff);
+                calories += calculateCalories((points[i].HeartRate + points[i - 1].HeartRate) / 2, points[i].Time - points[i - 1].Time);
             }
             Altitude.Avg = Altitude.Avg / range.Duration.TotalSeconds;
             Cadence.Avg = Cadence.Avg / cadenceTime;
@@ -161,8 +202,33 @@ namespace HRM_Track_Merger.ExerciseData {
             };
         }
 
-        private double calculateCalories(double heartRate, double time) {
-            return 0;
+        internal double calculateCalories(double heartRate, TimeSpan time) {
+            /*
+             * This calculator is based on the equations (shown below) derived by LR Keytel, 
+             * JH Goedecke, TD Noakes, H Hiiloskorpi, R Laukkanen, L van der Merwe, and EV Lambert 
+             * for their study titled "Prediction of energy expenditure from heart rate monitoring during submaximal exercise."
+             */
+            if (UserData.Age == null || UserData.Gender == null || UserData.Weight == null)
+                return 0;
+
+            double result = 0;
+            if (UserData.VO2Max != null && UserData.VO2Max != 0) {
+                if (UserData.Gender == Gender.Male) {
+                    result = (0.634 * heartRate + 0.404 * UserData.VO2Max.Value + 0.394 * UserData.Weight.Value + 0.271 * UserData.Age.Value - 95.7735);
+                }
+                else {
+                    result = (0.45 * heartRate + 0.380 * UserData.VO2Max.Value + 0.103 * UserData.Weight.Value + 0.274 * UserData.Age.Value - 59.3954);
+                }
+            }
+            else {
+                if (UserData.Gender == Gender.Male) {
+                    result = (0.6303 * heartRate + 0.1988 * UserData.Weight.Value + 0.2017 * UserData.Age.Value - 55.0969);
+                }
+                else {
+                    result = (0.4472 * heartRate + 0.1263 * UserData.Weight.Value + 0.074 * UserData.Age.Value - 20.4022);
+                }
+            }
+            return result * 60 * time.TotalHours / 4.184;
         }
 
         private void createSummaryFromPolarTrip(PolarHRM.PolarHRMFile.TripData PolarTrip) {
@@ -333,36 +399,36 @@ namespace HRM_Track_Merger.ExerciseData {
                     tcxLap.Extension.AvgSpeed = Utility.KMHToMPS(lap.Totals.Speed.Avg);
                 }
                 foreach (var trkPoint in DataPoints.FindAll(point => (
-                    point.Time >= lap.Totals.Time.Start 
-                    && (point.Time < lap.Totals.Time.End 
-                        || (lap==Laps.Last() && point.Time == lap.Totals.Time.End)
+                    point.Time >= lap.Totals.Time.Start
+                    && (point.Time < lap.Totals.Time.End
+                        || (lap == Laps.Last() && point.Time == lap.Totals.Time.End)
                     )
                     ))) {
 
-                        var tcxPoint = new GarminTCX.TrackPoint() {
-                            Time = trkPoint.Time,
-                            HeartRateBpm = new GarminTCX.HeartRate(Utility.RoundByte(trkPoint.HeartRate)),
-                        };
-                        if (IsPowerDataAvailable || IsSpeedDataAvailable) {
-                            tcxPoint.Extension = new GarminTCX.TrackPointExtension();
-                        }
-                        if (IsAltitudeDataAvailable) {
-                            tcxPoint.AltitudeMeters = trkPoint.Altitude;
-                        }
-                        if (IsCadenceDataAvailable) {
-                            tcxPoint.Cadence = Utility.RoundByte(trkPoint.Cadence);
-                        }
-                        if (IsNavigationDataAvailable) {
-                            tcxPoint.Position = new GarminTCX.Position(trkPoint.Latitude, trkPoint.Longitude);
-                        }
-                        if (IsPowerDataAvailable) {
-                            tcxPoint.Extension.Watts = Utility.RoundUInt(trkPoint.Power);
-                        }
-                        if (IsSpeedDataAvailable) {
-                            tcxPoint.DistanceMeters = trkPoint.Distance * 1000;
-                            tcxPoint.Extension.Speed = Utility.KMHToMPS(trkPoint.Speed);
-                        }
-                        tcxLap.Track.Add(tcxPoint);
+                    var tcxPoint = new GarminTCX.TrackPoint() {
+                        Time = trkPoint.Time,
+                        HeartRateBpm = new GarminTCX.HeartRate(Utility.RoundByte(trkPoint.HeartRate)),
+                    };
+                    if (IsPowerDataAvailable || IsSpeedDataAvailable) {
+                        tcxPoint.Extension = new GarminTCX.TrackPointExtension();
+                    }
+                    if (IsAltitudeDataAvailable) {
+                        tcxPoint.AltitudeMeters = trkPoint.Altitude;
+                    }
+                    if (IsCadenceDataAvailable) {
+                        tcxPoint.Cadence = Utility.RoundByte(trkPoint.Cadence);
+                    }
+                    if (IsNavigationDataAvailable) {
+                        tcxPoint.Position = new GarminTCX.Position(trkPoint.Latitude, trkPoint.Longitude);
+                    }
+                    if (IsPowerDataAvailable) {
+                        tcxPoint.Extension.Watts = Utility.RoundUInt(trkPoint.Power);
+                    }
+                    if (IsSpeedDataAvailable) {
+                        tcxPoint.DistanceMeters = trkPoint.Distance * 1000;
+                        tcxPoint.Extension.Speed = Utility.KMHToMPS(trkPoint.Speed);
+                    }
+                    tcxLap.Track.Add(tcxPoint);
                 }
 
                 activity.Laps.Add(tcxLap);
