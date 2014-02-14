@@ -18,6 +18,9 @@ namespace HRM_Track_Merger.PolarXML {
             if (elem["time"] != null) {
                 Time = DateTime.Parse(elem["time"].InnerXml, dtfi);
             }
+            else {
+                Time = TimeCreated;
+            }
             if (elem["sport"] != null) {
                 Sport = elem["sport"].InnerXml;
             }
@@ -30,6 +33,7 @@ namespace HRM_Track_Merger.PolarXML {
             if (elem["note"] != null) {
                 Note = elem["note"].InnerXml;
             }
+            setAvailabilityFlags();
         }
         public static ExerciseElement Parse(XmlElement elem) {
             return new ExerciseElement(elem);
@@ -47,6 +51,37 @@ namespace HRM_Track_Merger.PolarXML {
         //<xs:element name="note" minOccurs="0">...</xs:element>
         public string Note;
 
+        private void setAvailabilityFlags() {
+            if (Result != null && Result.Samples != null) {
+                foreach (Sample sample in Result.Samples) {
+                    switch (sample.SampleType) {
+                        case SampleType.SPEED:
+                            IsSpeedDataAvailable = true;
+                            break;
+                        case SampleType.CADENCE:
+                            IsCadenceDataAvailable = true;
+                            break;
+                        case SampleType.ALTITUDE:
+                            IsAltitudeDataAvailable = true;
+                            break;
+                        case SampleType.POWER:
+                            IsPowerDataAvailable = true;
+                            break;
+                        case SampleType.POWER_PI:
+                            IsPedallingIndexDataAvailable = true;
+                            break;
+                        case SampleType.POWER_LRB:
+                            IsBalanceDataAvailable = true;
+                            break;
+                        case SampleType.AIR_PRESSURE:
+                            IsAirPressureDataAvailable = true;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
 
 
         internal void UpdateUserData(User userData, bool forceReplace) {
@@ -68,9 +103,9 @@ namespace HRM_Track_Merger.PolarXML {
                 }
             }
         }
-        public ExerciseData.UserData GetUserData(){
+        public ExerciseData.UserData GetUserData() {
             var result = new ExerciseData.UserData();
-            if (Result != null && Result.UserSettingsData!=null) {
+            if (Result != null && Result.UserSettingsData != null) {
                 result.MaxHR = Result.UserSettingsData.HeartRate.Maximum;
                 result.RestHR = Result.UserSettingsData.HeartRate.Restring;
                 result.VO2Max = Result.UserSettingsData.VO2Max;
@@ -80,15 +115,15 @@ namespace HRM_Track_Merger.PolarXML {
         }
         public List<ExerciseData.DataPoint> GetDataPoints() {
             var result = new List<ExerciseData.DataPoint>();
-            if(Result==null || Result.Samples==null)
+            if (Result == null || Result.Samples == null)
                 return result;
             DateTime time = this.Time != null ? this.Time.Value : this.TimeCreated;
             int count = Result.Samples.Max(sample => sample.Values.Count);
-            TimeSpan interval = this.Result.RecordingRate!=null?
+            TimeSpan interval = this.Result.RecordingRate != null ?
                 this.Result.RecordingRate.Value
                 :
                 TimeSpan.FromSeconds(Math.Truncate(this.Result.Duration.TotalSeconds / count));
-            for (int i = 0; i < count; ++i,time = time + interval) {
+            for (int i = 0; i < count; ++i, time = time + interval) {
                 var point = new ExerciseData.DataPoint();
                 foreach (Sample sample in Result.Samples) {
                     switch (sample.SampleType) {
@@ -119,7 +154,7 @@ namespace HRM_Track_Merger.PolarXML {
                         default:
                             break;
                     }
-                    
+
                 }
                 point.Time = time;
                 result.Add(point);
@@ -132,21 +167,26 @@ namespace HRM_Track_Merger.PolarXML {
                 return result;
             DateTime time = this.Time != null ? this.Time.Value : this.TimeCreated;
             foreach (ExerciseLap lap in Result.Laps) {
-                time+=lap.Duration;
-                if (lap.EndingValues!=null) {
+                time += lap.Duration;
+                if (lap.EndingValues != null) {
                     var point = new ExerciseData.DataPoint();
                     point.Time = time;
                     if (lap.EndingValues.Cadence.HasValue) {
                         point.Cadence = lap.EndingValues.Cadence.Value;
                     }
                     if (lap.EndingValues.HeartRate.HasValue) {
-                        point.HeartRate= lap.EndingValues.HeartRate.Value;
+                        point.HeartRate = lap.EndingValues.HeartRate.Value;
                     }
                     if (lap.EndingValues.Speed.HasValue) {
                         point.Speed = lap.EndingValues.Speed.Value;
                     }
                     result.Add(point);
                 }
+            }
+            if (time < this.Time.Value + Result.Duration) {
+                result.Add(new ExerciseData.DataPoint() {
+                    Time = this.Time.Value + Result.Duration
+                });
             }
             return result;
         }
@@ -159,67 +199,99 @@ namespace HRM_Track_Merger.PolarXML {
                 var exLap = new ExerciseData.Lap();
                 exLap.Totals = new ExerciseData.Summary();
                 exLap.Totals.Time = new DateTimeRange(time, lap.Duration);
+                time = time + lap.Duration;
                 if (lap.Ascent.HasValue) {
                     exLap.Totals.Ascent = lap.Ascent.Value;
                 }
                 if (lap.Cadence != null) {
-                    exLap.Totals.Cadence = new Range<double>();
-                    if (lap.Cadence.Minimum.HasValue) {
-                        exLap.Totals.Cadence.Min = lap.Cadence.Minimum.Value;
-                    }
-                    if (lap.Cadence.Maximum.HasValue) {
-                        exLap.Totals.Cadence.Max = lap.Cadence.Maximum.Value;
-                    }
-                    if (lap.Cadence.Average.HasValue) {
-                        exLap.Totals.Cadence.Avg = lap.Cadence.Average.Value;
-                    }
+                    var cad = lap.Cadence.GetNotNullableRange();
+                    exLap.Totals.Cadence = new Range<double>(cad.Min,cad.Avg,cad.Max);
                 }
                 if (lap.Distance.HasValue) {
                     exLap.Totals.Distance = lap.Distance.Value;
                 }
                 if (lap.HeartRate != null) {
-                    exLap.Totals.HeartRate = new Range<double>();
-                    if (lap.HeartRate.Minimum.HasValue) {
-                        exLap.Totals.HeartRate.Min = lap.HeartRate.Minimum.Value;
-                    }
-                    if (lap.HeartRate.Maximum.HasValue) {
-                        exLap.Totals.HeartRate.Max = lap.HeartRate.Maximum.Value;
-                    }
-                    if (lap.HeartRate.Average.HasValue) {
-                        exLap.Totals.HeartRate.Avg = lap.HeartRate.Average.Value;
-                    }
+                    var hr = lap.HeartRate.GetNotNullableRange();
+                    exLap.Totals.HeartRate = new Range<double>(hr.Min,hr.Avg,hr.Max);
                 }
-                if (lap.Power!=null) {
-                    exLap.Totals.Power = new Range<double>();
-                    if (lap.Power.Power.HasValue) {
-                        exLap.Totals.Power.Avg = lap.Power.Power.Value;
-                    }
+                if (lap.Power != null && lap.Power.Power.HasValue) {
+                    exLap.Totals.Power = new Range<double>(lap.Power.Power.Value);
                 }
-                if (lap.Speed!=null) {
-                    exLap.Totals.Speed = new Range<double>();
-                    if (lap.Speed.Minimum.HasValue) {
-                        exLap.Totals.Speed.Min = lap.Speed.Minimum.Value;
-                    }
-                    if (lap.Speed.Maximum.HasValue) {
-                        exLap.Totals.Speed.Max = lap.Speed.Maximum.Value;
-                    }
-                    if (lap.Speed.Average.HasValue) {
-                        exLap.Totals.Speed.Avg = lap.Speed.Average.Value;
-                    }
+                if (lap.Speed != null) {
+                    exLap.Totals.Speed = lap.Speed.GetNotNullableRange();
                 }
                 if (lap.Temperature != null) {
-                    exLap.Totals.Temperature = new Range<double>();
-                    if (lap.Temperature.Minimum.HasValue) {
-                        exLap.Totals.Temperature.Min = lap.Temperature.Minimum.Value;
-                    }
-                    if (lap.Temperature.Maximum.HasValue) {
-                        exLap.Totals.Temperature.Max = lap.Temperature.Maximum.Value;
-                    }
-                    if (lap.Temperature.Average.HasValue) {
-                        exLap.Totals.Temperature.Avg = lap.Temperature.Average.Value;
-                    }
+                    exLap.Totals.Temperature = lap.Temperature.GetNotNullableRange();
                 }
                 result.Add(exLap);
+            }
+            if (time < this.Time + Result.Duration) {
+                var lap = new ExerciseData.Lap() {
+                    Totals = new ExerciseData.Summary() {
+                        Time = new DateTimeRange(time, this.Time.Value + Result.Duration)
+                    }
+                };
+                result.Add(lap);
+            }
+            return result;
+        }
+        public ExerciseData.Summary GetTotals() {
+            var result = new ExerciseData.Summary();
+            if (Result == null) {
+                return result;
+            }
+            if (Result.Altitude != null) {
+                result.Altitude = new Range<double>(
+                    Result.Altitude.Minimum.GetValueOrDefault(),
+                    Result.Altitude.Average.GetValueOrDefault(),
+                    Result.Altitude.Maximum.GetValueOrDefault()
+                    );
+            }
+            if (Result.AltitudeInfo != null) {
+                result.Ascent = Result.AltitudeInfo.Ascent.HasValue ? Result.AltitudeInfo.Ascent.Value : 0;
+            }
+            result.Calories = Result.Calories;
+            result.Distance = Result.Distance.HasValue ? Result.Distance.Value : 0;
+            result.Time = new DateTimeRange(this.Time.Value, Result.Duration);
+            if (Result.HeartRate != null) {
+                result.HeartRate = new Range<double>(
+                    Result.HeartRate.Minimum.GetValueOrDefault(),
+                    Result.HeartRate.Average.GetValueOrDefault(),
+                    Result.HeartRate.Maximum.GetValueOrDefault()
+                    );
+            }
+            if (Result.Power != null) {
+                result.Power = new Range<double>(
+                    Result.Power.Power.GetValueOrDefault(),
+                    Result.Power.Power.GetValueOrDefault(),
+                    Result.Power.Power.GetValueOrDefault()
+                    );
+            }
+            if (Result.Speed != null) {
+                if (Result.Speed.Speed != null) {
+                    result.Speed = new Range<double>(
+                        Result.Speed.Speed.Minimum.GetValueOrDefault(),
+                        Result.Speed.Speed.Average.GetValueOrDefault(),
+                        Result.Speed.Speed.Maximum.GetValueOrDefault()
+                        );
+                }
+                if (Result.Speed.Cadence != null) {
+                    result.Cadence = new Range<double>(
+                        Result.Speed.Cadence.Minimum.GetValueOrDefault(),
+                    Result.Speed.Cadence.Average.GetValueOrDefault(),
+                    Result.Speed.Cadence.Maximum.GetValueOrDefault()
+                        );
+                }
+            }
+            if (Result.Temperature != null) {
+                result.Temperature = new Range<double>(
+                        Result.Temperature.Minimum.GetValueOrDefault(),
+                    Result.Temperature.Average.GetValueOrDefault(),
+                    Result.Temperature.Maximum.GetValueOrDefault()
+                        );
+            }
+            if (this.Note != null) {
+                result.Note = this.Note;
             }
             return result;
         }
