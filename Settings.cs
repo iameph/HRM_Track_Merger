@@ -32,6 +32,9 @@ namespace HRM_Track_Merger {
                     if (splits.Length == 2) {
                         var key = splits[0].Trim().ToLower();
                         var val = splits[1].Trim();
+                        if (String.IsNullOrWhiteSpace(val)) {
+                            continue;
+                        }
                         if (dic.ContainsKey(key)) {
                             dic[key] = val;
                         }
@@ -101,19 +104,19 @@ namespace HRM_Track_Merger {
                         break;
                 }
             }
-            if (device.Name != null) {
+            if (device.Name != null && device.Version!=null) {
                 Device = device;
             }
-            if (author.Name != null) {
+            if (author.Name != null && author.LangID!=null && author.PartNumber!=null && author.Version!=null) {
                 Author = author;
             }
         }
         public static readonly Settings Default = new Settings() {
-            Author = new GarminTCX.Author() {
-                Name = "HRM_Track_Merger"
-            },
             Device = new GarminTCX.Creator() {
-                Name = "Unknown Device"
+                Name = "Unknown Device",
+                ProductID = 0,
+                UnitID =0,
+                Version = new uint[]{0,0,0,0}
             },
             Sport = "Other"
         };

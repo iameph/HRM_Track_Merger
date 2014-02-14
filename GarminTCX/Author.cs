@@ -9,7 +9,7 @@ namespace HRM_Track_Merger.GarminTCX {
         public System.Xml.XmlNode GenerateXML(System.Xml.XmlDocument doc) {
             var xmlNS = doc.DocumentElement.NamespaceURI;
             var elem = doc.CreateElement("Author", xmlNS);
-            elem.AppendChild(doc.CreateElement("Name", xmlNS)).InnerXml = Name;
+            elem.AppendChild(doc.CreateElement("Name", xmlNS)).InnerXml = Name!=null?Name:"Unknown";
             if (Version != null && LangID != null && PartNumber != null) {
                 var attr = doc.CreateAttribute("xsi", "type", "http://www.w3.org/2001/XMLSchema-instance");
                 attr.Value = "Application_t";

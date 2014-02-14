@@ -29,7 +29,7 @@ namespace HRM_Track_Merger.GarminTCX {
             foreach (var act in Activities) {
                 doc.DocumentElement["Activities"].AppendChild(act.GenerateXML(doc));
             }
-            if (Author != null) {
+            if (Author != null && Author.LangID!=null && Author.PartNumber!=null && Author.Version!=null) {
                 doc.DocumentElement.AppendChild(author.GenerateXML(doc));
             }
             using (var writer = XmlWriter.Create(fileName, ws)) {
