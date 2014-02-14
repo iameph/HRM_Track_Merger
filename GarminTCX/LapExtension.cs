@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace HRM_Track_Merger.GarminTCX {
     class LapExtension {
         public const string LapExtensionNS = "http://www.garmin.com/xmlschemas/ActivityExtension/v2";
