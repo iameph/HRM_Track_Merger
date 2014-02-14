@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 namespace HRM_Track_Merger.ExerciseData {
     class CommonExerciseData {
         public UserData UserData { get; private set; }
-        public CommonExerciseData(PolarHRM.PolarHRMFile polarHRM, UserData userData) {
+        public CommonExerciseData(PolarHRM.PolarHRMFile polarHRM) {
             UserData = createUserData(polarHRM);
-            loadUserData(userData);
             DataPoints = polarHRM.GetDataPointsInMetricSystem();
             var PolarTrip = polarHRM.GetTripDataInMetricSystem();
             var PolarLaps = polarHRM.GetLapsInMetricSystem();
@@ -18,38 +17,35 @@ namespace HRM_Track_Merger.ExerciseData {
             Totals.Time = new DateTimeRange(polarHRM.StartTime, polarHRM.Duration);
             correctLapsFromDataPoints();
             correctTotalsFromDataPoints();
+            UpdateCaloriesData();
             correctTotalsTemperatureFromLaps();
             setDataAvailabilityFields(polarHRM);
             Totals.Note = polarHRM.Note;
-
         }
 
-        private void loadUserData(ExerciseData.UserData data) {
+        public void UpdateUserData(ExerciseData.UserData data, bool currentDataHasPriority) {
             if (data == null) return;
             if (UserData == null) {
                 UserData = new UserData();
             }
-            if (data.Age != null && data.Age != 0  && (UserData.Age == null || UserData.Age == 0)) {
-                UserData.Age = data.Age;
-            }
-            if (data.Gender != null && UserData.Gender == null ) {
+            replaceValue(ref UserData.Age, ref data.Age, currentDataHasPriority);
+            if (data.Gender != null && !(currentDataHasPriority && UserData.Gender != null)) {
                 UserData.Gender = data.Gender;
             }
-            if (data.MaxHR != null && data.MaxHR != 0 && (UserData.MaxHR == null || UserData.MaxHR == 0)) {
-                UserData.MaxHR = data.MaxHR;
-            }
-            if (data.RestHR != null && data.RestHR != 0 && (UserData.RestHR == null || UserData.RestHR == 0)) {
-                UserData.RestHR = data.RestHR;
-            }
-            if (data.VO2Max != null && data.VO2Max != 0 && (UserData.VO2Max == null || UserData.VO2Max == 0)) {
-                UserData.VO2Max = data.VO2Max;
-            }
-            if (data.Weight != null && data.Weight != 0 && (UserData.Weight == null || UserData.Weight == 0)) {
-                UserData.Weight = data.Weight;
+            replaceValue(ref UserData.MaxHR, ref data.MaxHR, currentDataHasPriority);
+            replaceValue(ref UserData.RestHR, ref data.RestHR, currentDataHasPriority);
+            replaceValue(ref UserData.VO2Max, ref data.VO2Max, currentDataHasPriority);
+            replaceValue(ref UserData.Weight, ref data.Weight, currentDataHasPriority);
+        }
+        
+        public static bool NotNullAndNotDefault<T>(Nullable<T> val) where T : struct{
+            return val.HasValue && !val.Value.Equals(default(T));
+        }
+        private void replaceValue<T>(ref T? first, ref T? second, bool firstPriority) where T:struct {
+            if (NotNullAndNotDefault(second) && !(firstPriority && NotNullAndNotDefault(first))) {
+                first = second;
             }
         }
-        public CommonExerciseData(PolarHRM.PolarHRMFile polarHRM)
-            : this(polarHRM, null) { }
         private ExerciseData.UserData createUserData(PolarHRM.PolarHRMFile polarHRM) {
             var data = new UserData() {
                 Age = polarHRM.UserSettings.Age,
@@ -121,7 +117,27 @@ namespace HRM_Track_Merger.ExerciseData {
                 lap.Totals = sum;
             }
         }
-
+        public void UpdateCaloriesData() {
+            Totals.Calories = 0;
+            foreach (var lap in Laps) {
+                lap.Totals.Calories = GetCaloriesFromDataPoints(lap.Totals.Time);
+                Totals.Calories += lap.Totals.Calories;
+            }
+        }
+        public double GetCaloriesFromDataPoints(DateTimeRange range) {
+            var points = DataPoints.FindAll((point) => (point.Time >= range.Start && point.Time <= range.End));
+            if (points[0].Time > range.Start) {
+                points.Insert(0, GetDataPointWithInterpolation(range.Start));
+            }
+            if (points.Last().Time < range.End) {
+                points.Add(GetDataPointWithInterpolation(range.End));
+            }
+            double calories = 0;
+            for (int i = 1; i < points.Count; ++i) {
+                calories += calculateCalories((points[i].HeartRate + points[i - 1].HeartRate) / 2, points[i].Time - points[i - 1].Time);
+            }
+            return calories;
+        }
         public Summary calculateSummaryData(DateTimeRange range) {
             var points = DataPoints.FindAll((point) => (point.Time >= range.Start && point.Time <= range.End));
             points.Sort();
@@ -142,7 +158,6 @@ namespace HRM_Track_Merger.ExerciseData {
             Range<double> PowerBalance = new Range<double>(0, 0, 0);
             Range<double> Speed = new Range<double>(0, 0, 0);
             double speedTime = 0;
-            double calories = 0;
             for (int i = 1; i < points.Count; ++i) {
                 var timeDiff = (points[i].Time - points[i - 1].Time).TotalSeconds;
                 dist += (points[i].Speed + points[i - 1].Speed) * timeDiff / 2 / 3600;
@@ -162,7 +177,6 @@ namespace HRM_Track_Merger.ExerciseData {
                     speedTime += timeDiff;
                 }
 
-                calories += calculateCalories((points[i].HeartRate + points[i - 1].HeartRate) / 2, points[i].Time - points[i - 1].Time);
             }
             Altitude.Avg = Altitude.Avg / range.Duration.TotalSeconds;
             Cadence.Avg = Cadence.Avg / cadenceTime;
@@ -193,7 +207,7 @@ namespace HRM_Track_Merger.ExerciseData {
                 Altitude = Altitude,
                 Ascent = ascent,
                 Cadence = Cadence,
-                Calories = calories,
+                Calories = GetCaloriesFromDataPoints(range),
                 Distance = dist,
                 HeartRate = HeartRate,
                 Power = Power,
