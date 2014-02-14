@@ -6,8 +6,15 @@ using System.Threading.Tasks;
 
 namespace HRM_Track_Merger.ExerciseData {
     class CommonExerciseData {
-        public UserData UserData { get; private set; }
+        public UserData UserData { get; set; }
         public CommonExerciseData(PolarHRM.PolarHRMFile polarHRM) {
+            Load(polarHRM);
+        }
+
+        public CommonExerciseData() {
+            // TODO: Complete member initialization
+        }
+        public void Load(PolarHRM.PolarHRMFile polarHRM) {
             UserData = createUserData(polarHRM);
             DataPoints = polarHRM.GetDataPointsInMetricSystem();
             var PolarTrip = polarHRM.GetTripDataInMetricSystem();
@@ -23,7 +30,6 @@ namespace HRM_Track_Merger.ExerciseData {
             setDataAvailabilityFields(polarHRM);
             Totals.Note = polarHRM.Note;
         }
-
         public void UpdateUserData(ExerciseData.UserData data, bool currentDataHasPriority) {
             if (data == null) return;
             if (UserData == null) {
@@ -38,11 +44,11 @@ namespace HRM_Track_Merger.ExerciseData {
             replaceValue(ref UserData.VO2Max, ref data.VO2Max, currentDataHasPriority);
             replaceValue(ref UserData.Weight, ref data.Weight, currentDataHasPriority);
         }
-        
-        public static bool NotNullAndNotDefault<T>(Nullable<T> val) where T : struct{
+
+        public static bool NotNullAndNotDefault<T>(Nullable<T> val) where T : struct {
             return val.HasValue && !val.Value.Equals(default(T));
         }
-        private void replaceValue<T>(ref T? first, ref T? second, bool firstPriority) where T:struct {
+        private void replaceValue<T>(ref T? first, ref T? second, bool firstPriority) where T : struct {
             if (NotNullAndNotDefault(second) && !(firstPriority && NotNullAndNotDefault(first))) {
                 first = second;
             }
