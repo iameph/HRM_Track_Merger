@@ -177,7 +177,7 @@ namespace HRM_Track_Merger {
                 "",
                 "Usage: "+name+ ".exe <hrm file> [<gpx file>] [/output:<output_file_name>] [/offset:<offset>] [/sport:<sport>] [/sex:<sex>] [/age:<age>] [/weight:<weight>] [/vo2max:<vo2max>]",
                 "where:",
-                "<hrm file> - path to hrm file, currently Polar HRM(.hrm) supported",
+                "<hrm file> - path to hrm file, currently Polar HRM(.hrm) and Polar XML(.xml) are supported",
                 "<gpx file> - path to gpx file",
                 "<output_file_name> - path to output file" ,
                 "<offset> - offset in seconds to add to GPS time",
