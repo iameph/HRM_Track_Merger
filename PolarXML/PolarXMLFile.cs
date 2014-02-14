@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Xml;
 
 namespace HRM_Track_Merger.PolarXML {
-    class PolarXMLFile {
+    class PolarXMLFile : ExerciseData.IExerciseCollection{
         private List<ExerciseElement> _exercises;
         public List<ExerciseElement> Exercises {
             get {
@@ -36,6 +36,8 @@ namespace HRM_Track_Merger.PolarXML {
         }
 
         private void ParseFile(XmlDocument doc) {
+            var culture = System.Threading.Thread.CurrentThread.CurrentCulture;
+            System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
             var data = doc["polar-exercise-data"];
             if (data == null) {
                 throw new InvalidFileFormatException();
@@ -51,6 +53,10 @@ namespace HRM_Track_Merger.PolarXML {
                     }
                 }
             }
+            System.Threading.Thread.CurrentThread.CurrentCulture = culture;
+        }
+        public List<ExerciseData.IExercise> GetExercises() {
+            return Exercises.Cast<ExerciseData.IExercise>().ToList();
         }
 
     }
