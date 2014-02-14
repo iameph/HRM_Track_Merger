@@ -48,9 +48,19 @@ namespace HRM_Track_Merger.GarminTCX {
         public List<Activity> Activities { get { return activities; } protected set { activities = value; } }
         private Author author;
         public Author Author { get { return author; } set { author = value; } }
-        public void SetSport(int idx, Sport sport) {
+        public void SetSport(Sport sport, int idx) {
             if (Activities != null && Activities.Count > idx) {
                 Activities[idx].Sport = sport;
+            }
+        }
+        public void SetSport(Sport sport) {
+            foreach (var act in Activities) {
+                act.Sport = sport;
+            }
+        }
+        public void SetCreator(Creator creator) {
+            foreach (var act in Activities) {
+                act.Creator = (Creator)creator.Clone();
             }
         }
     }
