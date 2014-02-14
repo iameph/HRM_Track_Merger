@@ -33,6 +33,9 @@ namespace HRM_Track_Merger.GarminTCX {
             foreach (var act in Activities) {
                 doc.DocumentElement["Activities"].AppendChild(act.GenerateXML(doc));
             }
+            if (Author != null) {
+                doc.DocumentElement.AppendChild(author.GenerateXML(doc));
+            }
             using (var writer = XmlWriter.Create(fileName, ws)) {
                 doc.Save(writer);
             }
@@ -44,7 +47,7 @@ namespace HRM_Track_Merger.GarminTCX {
         private List<Activity> activities;
         public List<Activity> Activities { get { return activities; } protected set { activities = value; } }
         private Author author;
-        public Author Author { get { return author; } protected set { author = value; } }
+        public Author Author { get { return author; } set { author = value; } }
         public void SetSport(int idx, Sport sport) {
             if (Activities != null && Activities.Count > idx) {
                 Activities[idx].Sport = sport;
