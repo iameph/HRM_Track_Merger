@@ -23,5 +23,8 @@ namespace HRM_Track_Merger {
         public static uint RoundUInt(double val) {
             return (uint)Math.Round(val, MidpointRounding.AwayFromZero);
         }
+        public static double FahrenheitToCelsius(double val) {
+            return (val - 32) * 5 / 9;
+        }
     }
 }

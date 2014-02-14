@@ -375,12 +375,19 @@ namespace HRM_Track_Merger.PolarHRM {
                     Ascend = getMeters(lap.Ascend),
                     Distance = getKilometers(lap.Distance),
                     Power = lap.Power,
-                    Temperature = lap.Temperature,
+                    Temperature = getCelsius(lap.Temperature),
                     Note = lap.Note,
                     AutomaticLap = lap.AutomaticLap
                 });
             }
             return laps;
+        }
+
+        private double getCelsius(double p) {
+            if (IsImperialSystemUsed) {
+                return Utility.FahrenheitToCelsius(p);
+            }
+            return p;
         }
     }
 }
