@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HRM_Track_Merger.ExerciseData {
+namespace HRM_Track_Merger {
     struct Range<T> {
         public T Min;
         public T Max;
