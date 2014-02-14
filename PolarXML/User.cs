@@ -8,11 +8,23 @@ using System.Xml;
 namespace HRM_Track_Merger.PolarXML {
     class User : UserSettings {
         public User() { }
-        public User(XmlElement elem) : base(elem) {
+        public User(XmlElement elem)
+            : base(elem) {
             ParseXmlElement(elem);
         }
         private void ParseXmlElement(XmlElement elem) {
-
+            foreach (XmlElement el in elem) {
+                switch (el.LocalName) {
+                    case "email":
+                        Email = el.InnerXml;
+                        break;
+                    case "nickname":
+                        NickName = el.InnerXml;
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
         public static new User Parse(XmlElement elem) {
             return new User(elem);

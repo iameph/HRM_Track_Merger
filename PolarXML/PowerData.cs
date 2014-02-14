@@ -12,7 +12,21 @@ namespace HRM_Track_Merger.PolarXML {
             ParseXmlElement(elem);
         }
         private void ParseXmlElement(XmlElement elem) {
-
+            foreach (XmlElement el in elem.ChildNodes) {
+                switch (el.LocalName) {
+                    case "power":
+                        Power = UInt32.Parse(el.InnerXml);
+                        break;
+                    case "pedal-index":
+                        PedalIndex = FloatRange.Parse(el);
+                        break;
+                    case "left-right-balance":
+                        LeftRightBalance = Double.Parse(el.InnerXml);
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
         public static PowerData Parse(XmlElement elem) {
             return new PowerData(elem);
@@ -20,7 +34,7 @@ namespace HRM_Track_Merger.PolarXML {
         //<xs:element name="power" type="short-range" minOccurs="0"/>
         public uint? Power;
         //<xs:element name="pedal-index" type="float-range" minOccurs="0"/>
-        public Range<double> PedalIndex;
+        public FloatRange PedalIndex;
         //xs:element name="left-right-balance" minOccurs="0"> float
         public double? LeftRightBalance;
     }

@@ -12,7 +12,24 @@ namespace HRM_Track_Merger.PolarXML {
             ParseXmlElement(elem);
         }
         private void ParseXmlElement(XmlElement elem) {
-
+            foreach (XmlElement el in elem) {
+                switch (el.LocalName) {
+                    case "heart-rate":
+                        HeartRate = HeartRateRange.Parse(el);
+                        break;
+                    case "vo2max":
+                        VO2Max = Byte.Parse(el.InnerXml);
+                        break;
+                    case "weight":
+                        Weight = Double.Parse(el.InnerXml);
+                        break;
+                    case "height":
+                        Height = Double.Parse(el.InnerXml);
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
         public static UserSettings Parse(XmlElement elem) {
             return new UserSettings(elem);
@@ -24,6 +41,6 @@ namespace HRM_Track_Merger.PolarXML {
         //<xs:element name="weight" minOccurs="0"> float
         public double? Weight;
         //<xs:element name="height" minOccurs="0"> float
-        public double Height;
+        public double? Height;
     }
 }

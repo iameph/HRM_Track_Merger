@@ -22,7 +22,7 @@ namespace HRM_Track_Merger.PolarXML {
                 Sport = elem["sport"].InnerXml;
             }
             if (elem["name"] != null) {
-                Sport = elem["name"].InnerXml;
+                Name = elem["name"].InnerXml;
             }
             if (elem["result"] != null) {
                 Result = Result.Parse(elem["result"]);
