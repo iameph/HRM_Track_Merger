@@ -14,5 +14,8 @@ namespace HRM_Track_Merger {
             Max = max;
             Avg = avg;
         }
+        public Range(T value) {
+            Min = Avg = Max = value;
+        }
     }
 }
