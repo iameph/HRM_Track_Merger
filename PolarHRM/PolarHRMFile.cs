@@ -10,7 +10,7 @@ namespace HRM_Track_Merger.PolarHRM {
     //TODO:
     //1. Create last lap automatically
     //2. Create new track points from lap data
-    class PolarHRMFile {
+    class PolarHRMFile : ExerciseData.IExercise, ExerciseData.IExerciseCollection {
         protected IDictionary<string, string> Params;
         protected virtual int LapsDataCount { get { return 16; } }
         protected IDictionary<string, List<string>> sections;
@@ -388,6 +388,91 @@ namespace HRM_Track_Merger.PolarHRM {
                 return Utility.FahrenheitToCelsius(p);
             }
             return p;
+        }
+
+        public List<ExerciseData.IExercise> GetExercises() {
+            var result = new List<ExerciseData.IExercise>();
+            result.Add(this);
+            return result;
+        }
+
+        public List<ExerciseData.DataPoint> GetDataPoints() {
+            return GetDataPointsInMetricSystem();
+        }
+
+        public List<ExerciseData.DataPoint> GetDataPointsWithPartialData() {
+            var result = new List<ExerciseData.DataPoint>();
+            foreach (var lap in Laps) {
+                    var point = new ExerciseData.DataPoint();
+                    point.Altitude = getMeters(lap.Altitude);
+                    point.Cadence = lap.Cadence;
+                    point.HeartRate = lap.HR;
+                    point.Power = lap.Power;
+                    point.PowerBalance = 0;
+                    point.Speed = getKilometers(lap.Speed);
+                    point.Time = lap.StartTime + lap.Duration;
+                    result.Add(point);
+            }
+            return result;
+        }
+
+        public List<ExerciseData.Lap> GetLaps() {
+            var PolarLaps = GetLapsInMetricSystem();
+            var ExerciseLaps = new List<ExerciseData.Lap>(PolarLaps.Count);
+            foreach (var lap in PolarLaps) {
+                ExerciseLaps.Add(new ExerciseData.Lap() {
+                    Totals = new ExerciseData.Summary() {
+                        Distance = lap.Distance,
+                        HeartRate = new Range<double>() {
+                            Min = lap.HRmin,
+                            Avg = lap.HRavg,
+                            Max = lap.HRmax
+                        },
+                        Temperature = new Range<double>() {
+                            Min = lap.Temperature,
+                            Avg = lap.Temperature,
+                            Max = lap.Temperature
+                        },
+                        Time = new DateTimeRange(lap.StartTime, lap.Duration),
+                        Note = lap.Note
+                    }
+                });
+            }
+            return ExerciseLaps;
+        }
+
+        public ExerciseData.UserData GetUserData() {
+            var result = new ExerciseData.UserData();
+            if (UserSettings.Age.HasValue) {
+                result.Age = UserSettings.Age.Value;
+            }
+            if (UserSettings.MaxHR.HasValue) {
+                result.MaxHR = UserSettings.MaxHR.Value;
+            }
+            if (UserSettings.RestHR.HasValue) {
+                result.RestHR = UserSettings.RestHR.Value;
+            }
+            if (UserSettings.VO2Max.HasValue) {
+                result.VO2Max = UserSettings.VO2Max.Value;
+            }
+            if (UserSettings.Weight.HasValue) {
+                result.Weight = UserSettings.Weight.Value;
+            }
+            return result;
+        }
+
+        public ExerciseData.Summary GetTotals() {
+            var result = new ExerciseData.Summary();
+            var PolarTrip = GetTripDataInMetricSystem();
+            result = new ExerciseData.Summary() {
+                Altitude = new Range<double>(PolarTrip.AvgAltitude, PolarTrip.AvgAltitude, PolarTrip.MaxAltitude),
+                Ascent = PolarTrip.Ascent,
+                Distance = PolarTrip.Distance,
+                Speed = new Range<double>(0, PolarTrip.AvgSpeed, PolarTrip.MaxSpeed),
+                Note = this.Note,
+                Time = new DateTimeRange(this.StartTime,this.Duration)
+            };
+            return result;
         }
     }
 }
