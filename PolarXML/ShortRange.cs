@@ -28,5 +28,25 @@ namespace HRM_Track_Merger.PolarXML {
         public byte? Minimum;
         public byte? Maximum;
         public byte? Average;
+        public Range<byte> GetNotNullableRange() {
+            List<byte> values = new List<byte>();
+            if (Minimum.HasValue) {
+                values.Add(Minimum.Value);
+            }
+            if (Average.HasValue) {
+                values.Add(Average.Value);
+            }
+            if (Maximum.HasValue) {
+                values.Add(Maximum.Value);
+            }
+            if (values.Count == 0) {
+                return new Range<byte>(0, 0, 0);
+            }
+            return new Range<byte>(
+                values.Min(),
+                (byte)(Average.HasValue ? Average.Value : (values.Min() + values.Max()) / 2),
+                values.Max()
+                );
+        }
     }
 }
