@@ -28,6 +28,11 @@ namespace HRM_Track_Merger.PolarXML {
             doc.Load(filename);
             Exercises = new List<ExerciseElement>();
             ParseFile(doc);
+            if (User != null) {
+                foreach (ExerciseElement exercise in Exercises) {
+                    exercise.UpdateUserData(User, false);
+                }
+            }
         }
 
         private void ParseFile(XmlDocument doc) {
