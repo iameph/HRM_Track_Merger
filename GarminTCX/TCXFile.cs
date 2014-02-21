@@ -32,8 +32,11 @@ namespace HRM_Track_Merger.GarminTCX {
             if (Author != null && Author.LangID!=null && Author.PartNumber!=null && Author.Version!=null) {
                 doc.DocumentElement.AppendChild(author.GenerateXML(doc));
             }
-            using (var writer = XmlWriter.Create(fileName, ws)) {
-                doc.Save(writer);
+            var utf8WithoutBom = new System.Text.UTF8Encoding(false);
+            using (var sink = new System.IO.StreamWriter(fileName, false, utf8WithoutBom)) {
+                using( var writer = XmlWriter.Create(sink,ws)){
+                     doc.Save(writer);
+                }
             }
             System.Threading.Thread.CurrentThread.CurrentCulture = currentCulture;
         }
