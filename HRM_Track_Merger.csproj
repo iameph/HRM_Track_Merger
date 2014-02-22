@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClassExtensions.cs" />
     <Compile Include="CommandLineArguments.cs" />
     <Compile Include="DateTimeRange.cs" />
     <Compile Include="ExerciseData\CommonExerciseData.cs" />
