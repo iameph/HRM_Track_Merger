@@ -16,7 +16,7 @@ namespace HRM_Track_Merger.GarminTCX {
             var elem = doc.CreateElement("Trackpoint", xmlNS);
             elem.AppendChild(doc.CreateElement("Time", xmlNS)).InnerXml = TCXFile.DateTimeToXmlString(Time);
             if (Position != null) {
-                elem.AppendChild(Position.GenerateXML(doc));
+                elem.AppendNotNullChild(Position.GenerateXML(doc));
             }
             if (AltitudeMeters != null) {
                 elem.AppendChild(doc.CreateElement("AltitudeMeters", xmlNS)).InnerXml = AltitudeMeters.ToString();
@@ -25,13 +25,13 @@ namespace HRM_Track_Merger.GarminTCX {
                 elem.AppendChild(doc.CreateElement("DistanceMeters", xmlNS)).InnerXml = DistanceMeters.ToString();
             }
             if (HeartRateBpm != null) {
-                elem.AppendChild(HeartRateBpm.GenerateXML(doc, "HeartRateBpm"));
+                elem.AppendNotNullChild(HeartRateBpm.GenerateXML(doc, "HeartRateBpm"));
             }
             if (Cadence != null) {
                 elem.AppendChild(doc.CreateElement("Cadence", xmlNS)).InnerXml = Cadence.ToString();
             }
             if (Extension != null) {
-                elem.AppendChild(Extension.GenerateXML(doc));
+                elem.AppendNotNullChild(Extension.GenerateXML(doc));
             }
             return elem;
         }

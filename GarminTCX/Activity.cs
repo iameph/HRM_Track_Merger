@@ -14,7 +14,7 @@ namespace HRM_Track_Merger.GarminTCX {
             actElem.SetAttribute("Sport", Sport.ToString());
             actElem.AppendChild(doc.CreateElement("Id", xmlNS)).InnerXml = TCXFile.DateTimeToXmlString(Id);
             foreach (var lap in Laps) {
-                actElem.AppendChild(lap.GenerateXML(doc));
+                actElem.AppendNotNullChild(lap.GenerateXML(doc));
             }
             if (Notes != null) {
                 var note = Notes.Trim();
@@ -23,7 +23,7 @@ namespace HRM_Track_Merger.GarminTCX {
                 }
             }
             if (Creator != null) {
-                actElem.AppendChild(Creator.GenerateXML(doc));
+                actElem.AppendNotNullChild(Creator.GenerateXML(doc));
             }
             return actElem;
         }

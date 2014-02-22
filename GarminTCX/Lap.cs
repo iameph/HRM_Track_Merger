@@ -28,10 +28,10 @@ namespace HRM_Track_Merger.GarminTCX {
             }
             lapElem.AppendChild(doc.CreateElement("Calories", xmlNS)).InnerXml = Calories.ToString();;
             if (AverageHeartRateBpm != null) {
-                lapElem.AppendChild(AverageHeartRateBpm.GenerateXML(doc, "AverageHeartRateBpm"));
+                lapElem.AppendNotNullChild(AverageHeartRateBpm.GenerateXML(doc, "AverageHeartRateBpm"));
             }
             if (MaximumHeartRateBpm != null) {
-                lapElem.AppendChild(MaximumHeartRateBpm.GenerateXML(doc, "MaximumHeartRateBpm"));
+                lapElem.AppendNotNullChild(MaximumHeartRateBpm.GenerateXML(doc, "MaximumHeartRateBpm"));
             }
             lapElem.AppendChild(doc.CreateElement("Intensity", xmlNS)).InnerXml = Intensity;;
             if (Cadence != null) {
@@ -41,7 +41,7 @@ namespace HRM_Track_Merger.GarminTCX {
             if (Track != null) {
                 lapElem.AppendChild(doc.CreateElement("Track", xmlNS));
                 foreach (var trkPoint in Track) {
-                    lapElem["Track"].AppendChild(trkPoint.GenerateXML(doc));
+                    lapElem["Track"].AppendNotNullChild(trkPoint.GenerateXML(doc));
                 }
             }
             if (Notes != null) {
@@ -51,7 +51,7 @@ namespace HRM_Track_Merger.GarminTCX {
                 }
             }
             if (Extension != null) {
-                lapElem.AppendChild(Extension.GenerateXML(doc));
+                lapElem.AppendNotNullChild(Extension.GenerateXML(doc));
             }
             return lapElem;
         }
