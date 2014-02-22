@@ -14,45 +14,12 @@ namespace HRM_Track_Merger {
             var currentCulture = System.Threading.Thread.CurrentThread.CurrentCulture;
             System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
             try {
-                CommandLineArguments cmdArgs = null;
-                try {
-                    cmdArgs = CommandLineArguments.Parse(args);
-                }
-                catch (InvalidArgumentsException e) {
-                    throw new Exception("Incorrect arguments! Execute program with /? key for help\n" + e.Message);
-                }
-                catch (Exception) {
-                    throw new Exception("Something wrong with arguments, please contact authors");
-                }
-                if (cmdArgs == null)
-                    return 1;
-
+                var cmdArgs = CommandLineArguments.Parse(args);
                 if (cmdArgs.HRMFileName == null) {
-                    throw new Exception("No HRM file in arguments or file doesn't exist");
+                    throw new InvalidArgumentsException("No HRM file in arguments or file doesn't exist");
                 }
-                Settings settings;
-                if (File.Exists(AssemblyDirectory+@"\settings.cfg")) {
-                    settings = new Settings(AssemblyDirectory + @"\settings.cfg");
-                }
-                else {
-                    settings = Settings.Default;
-                }
-
-                ExerciseData.IExerciseCollection hrmFile;
-                switch (Path.GetExtension(cmdArgs.HRMFileName)) {
-                    case ".hrm":
-                        hrmFile = PolarHRM.PolarHRMFile.Parse(cmdArgs.HRMFileName);
-                        break;
-                    case ".xml":
-                        hrmFile = new PolarXML.PolarXMLFile(cmdArgs.HRMFileName);
-                        break;
-                    default:
-                        throw new UnknownFileTypeException();
-                }
-                List<ExerciseData.CommonExerciseData> exercises = new List<ExerciseData.CommonExerciseData>();
-                foreach (var ex in hrmFile.GetExercises()) {
-                    exercises.Add(new ExerciseData.CommonExerciseData(ex));
-                }
+                var settings = GetSettingsFromFile(AssemblyDirectory + @"\settings.cfg");
+                var exercises = GetExercisesFromHRMFile(GetHRMFile(cmdArgs));
                 foreach (var ex in exercises) {
                     ex.UpdateUserData(settings.GetUserData(ex.Totals.Time.Start), true);
                     ex.UpdateUserData(ParseUserOptions(cmdArgs.GetOptions()), false);
@@ -74,17 +41,7 @@ namespace HRM_Track_Merger {
                 foreach (var ex in exercises) {
                     tcxFile.Activities.Add(ex.ConvertToTCXActivity());
                 }
-                GarminTCX.Sport sport = GarminTCX.Sport.Other;
-                if (settings.Sport != null) {
-                    Enum.TryParse<GarminTCX.Sport>(settings.Sport, true, out sport);
-                }
-                if (cmdArgs.GetOptions().ContainsKey("sport")) {
-                    if (!Enum.TryParse<GarminTCX.Sport>(cmdArgs.GetOptions()["sport"], true, out sport)) {
-                        Console.WriteLine("Incorrect sport name, use Other instead");
-                        sport = GarminTCX.Sport.Other;
-                    }
-                }
-                tcxFile.SetSport(sport);
+                tcxFile.SetSport(GetSportFromSettingsOrArguments(cmdArgs, settings));
                 if (settings.Device != null) {
                     foreach (var act in tcxFile.Activities) {
                         act.Creator = settings.Device;
@@ -102,11 +59,63 @@ namespace HRM_Track_Merger {
                 }
                 tcxFile.Save(outputFileName, new System.Xml.XmlWriterSettings() { Indent = true, IndentChars = "\t" });
             }
+            catch (InvalidArgumentsException e) {
+                Console.WriteLine("Incorrect arguments! Execute program with /? key for help\n" + e.Message);
+                return 1;
+            }
             catch (Exception e) {
-                Console.WriteLine("Something bad happened. Please contact author. Error message: "+e.Message);
+                Console.WriteLine("Something bad happened. Please contact author. Error message: " + e.Message);
                 return 1;
             }
             return 0;
+        }
+
+        private static GarminTCX.Sport GetSportFromSettingsOrArguments(CommandLineArguments cmdArgs, Settings settings) {
+            var sport = GarminTCX.Sport.Other;
+            if (settings.Sport != null) {
+                Enum.TryParse<GarminTCX.Sport>(settings.Sport, true, out sport);
+            }
+            if (cmdArgs.GetOptions().ContainsKey("sport")) {
+                if (!Enum.TryParse<GarminTCX.Sport>(cmdArgs.GetOptions()["sport"], true, out sport)) {
+                    Console.WriteLine("Incorrect sport name, use Other instead");
+                    sport = GarminTCX.Sport.Other;
+                }
+            }
+            return sport;
+        }
+
+        private static List<ExerciseData.CommonExerciseData> GetExercisesFromHRMFile(ExerciseData.IExerciseCollection hrmFile) {
+            var exercises = new List<ExerciseData.CommonExerciseData>();
+            foreach (var ex in hrmFile.GetExercises()) {
+                exercises.Add(new ExerciseData.CommonExerciseData(ex));
+            }
+            return exercises;
+        }
+
+        private static ExerciseData.IExerciseCollection GetHRMFile(CommandLineArguments cmdArgs) {
+            ExerciseData.IExerciseCollection hrmFile;
+            switch (Path.GetExtension(cmdArgs.HRMFileName)) {
+                case ".hrm":
+                    hrmFile = PolarHRM.PolarHRMFile.Parse(cmdArgs.HRMFileName);
+                    break;
+                case ".xml":
+                    hrmFile = new PolarXML.PolarXMLFile(cmdArgs.HRMFileName);
+                    break;
+                default:
+                    throw new UnknownFileTypeException();
+            }
+            return hrmFile;
+        }
+
+        private static Settings GetSettingsFromFile(string fileName) {
+            Settings settings;
+            if (File.Exists(fileName)) {
+                settings = new Settings(fileName);
+            }
+            else {
+                settings = Settings.Default;
+            }
+            return settings;
         }
 
         private static string GenerateOutputFileName(string hrmFileName, string gpsFileName) {
