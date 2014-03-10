@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace HRM_Track_Merger {
-    class Utility {
+    public static class Utility {
         public const double MILE = 1.609344d;
         public const double FEET = 0.3048d;
         public static double MilesToKilometers(double miles) {
