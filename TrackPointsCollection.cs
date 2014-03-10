@@ -11,37 +11,37 @@ namespace HRM_Track_Merger {
         }
         public TrackPoint GetTrackPointAtTime(DateTime time){
             var searchPoint = new TrackPoint();
-            searchPoint.time = time;
+            searchPoint.Time = time;
             var index = TrackPoints.BinarySearch(searchPoint, new TrackPointTimeComparer());
             if (index >= 0 && index < TrackPoints.Count) {
-                return TrackPoints[index];
+                return (TrackPoint)TrackPoints[index].Clone();
             }
             if (~index == TrackPoints.Count) {
                 var returnPoint = TrackPoints[TrackPoints.Count - 1];
-                returnPoint.time = time;
-                return returnPoint;
+                returnPoint.Time = time;
+                return (TrackPoint)returnPoint.Clone();
             }
             if (~index == 0) {
                 var returnPoint = TrackPoints[0];
-                returnPoint.time = time;
-                return returnPoint;
+                returnPoint.Time = time;
+                return (TrackPoint)returnPoint.Clone();
             }
             return InterpolatePoint(~index,time);
         }
         private TrackPoint InterpolatePoint(int index,DateTime time){
-            TrackPoint returnPoint;
-            returnPoint.time = time;
-            returnPoint.latitude = Interpolate(
-                TrackPoints[index - 1].time.Ticks, TrackPoints[index].time.Ticks,
-                TrackPoints[index - 1].latitude, TrackPoints[index].latitude,
+            TrackPoint returnPoint = new TrackPoint();
+            returnPoint.Time = time;
+            returnPoint.Latitude = Interpolate(
+                TrackPoints[index - 1].Time.Ticks, TrackPoints[index].Time.Ticks,
+                TrackPoints[index - 1].Latitude, TrackPoints[index].Latitude,
                 time.Ticks);
-            returnPoint.longitude = Interpolate(
-                TrackPoints[index - 1].time.Ticks, TrackPoints[index].time.Ticks,
-                TrackPoints[index - 1].longitude, TrackPoints[index].longitude,
+            returnPoint.Longitude = Interpolate(
+                TrackPoints[index - 1].Time.Ticks, TrackPoints[index].Time.Ticks,
+                TrackPoints[index - 1].Longitude, TrackPoints[index].Longitude,
                 time.Ticks);
-            returnPoint.elevation = Interpolate(
-                TrackPoints[index - 1].time.Ticks, TrackPoints[index].time.Ticks,
-                TrackPoints[index - 1].elevation, TrackPoints[index].elevation,
+            returnPoint.Elevation = Interpolate(
+                TrackPoints[index - 1].Time.Ticks, TrackPoints[index].Time.Ticks,
+                TrackPoints[index - 1].Elevation, TrackPoints[index].Elevation,
                 time.Ticks);
             return returnPoint;
         }
@@ -50,7 +50,7 @@ namespace HRM_Track_Merger {
         }
         class TrackPointTimeComparer : IComparer<TrackPoint> {
             public int Compare(TrackPoint x, TrackPoint y) {
-                return DateTime.Compare(x.time, y.time);
+                return DateTime.Compare(x.Time, y.Time);
             }
         }
     }

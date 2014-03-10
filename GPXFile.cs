@@ -61,15 +61,15 @@ namespace HRM_Track_Merger {
                 XmlElement elevationElement = node["ele"];
                 if (time == null || lon == null || lat == null) continue;
                 IFormatProvider format = CultureInfo.InvariantCulture.NumberFormat;
-                point.latitude = Double.Parse(lat.Value, format);
-                point.longitude = Double.Parse(lon.Value, format);
-                point.time = DateTime.Parse(time.InnerText);
+                point.Latitude = Double.Parse(lat.Value, format);
+                point.Longitude = Double.Parse(lon.Value, format);
+                point.Time = DateTime.Parse(time.InnerText);
                 if (isPolarStupidGPX) {
-                    point.time -= TimeZoneInfo.Local.BaseUtcOffset;
+                    point.Time -= TimeZoneInfo.Local.BaseUtcOffset;
                 }
-                point.time += offset;
+                point.Time += offset;
                 if (elevationElement != null) {
-                    point.elevation = Double.Parse(elevationElement.InnerText, format);
+                    point.Elevation = Double.Parse(elevationElement.InnerText, format);
                 }
                 list.Add(point);
             }
@@ -91,9 +91,9 @@ namespace HRM_Track_Merger {
             var lat = doc.CreateAttribute("lat");
             var lon = doc.CreateAttribute("lon");
             var time = doc.CreateElement("time", _currSegment.NamespaceURI);
-            lat.Value = XmlConvert.ToString(point.latitude);
-            lon.Value = XmlConvert.ToString(point.longitude);
-            var xmlTime = point.time.ToUniversalTime();
+            lat.Value = XmlConvert.ToString(point.Latitude);
+            lon.Value = XmlConvert.ToString(point.Longitude);
+            var xmlTime = point.Time.ToUniversalTime();
             if (isPolarStupidGPX) {
                 xmlTime += TimeZoneInfo.Local.BaseUtcOffset;
             }

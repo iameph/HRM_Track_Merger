@@ -330,17 +330,17 @@ namespace HRM_Track_Merger.ExerciseData {
             var track = new TrackPointsCollection(gpxFile.GetTrackPoints(offset));
             foreach (var point in DataPoints) {
                 var tPoint = track.GetTrackPointAtTime(point.Time);
-                point.Latitude = tPoint.latitude;
-                point.Longitude = tPoint.longitude;
+                point.Latitude = tPoint.Latitude;
+                point.Longitude = tPoint.Longitude;
             }
             var trackPointInRange = track.TrackPoints.FindAll(
-                point => point.time >= Totals.Time.Start && point.time <= Totals.Time.End);
+                point => point.Time >= Totals.Time.Start && point.Time <= Totals.Time.End);
             var pointsToAdd = new List<DataPoint>();
             foreach (var point in trackPointInRange) {
-                if (DataPointExists(point.time)) continue;
-                var dataPoint = GetDataPointWithInterpolation(point.time);
-                dataPoint.Longitude = point.longitude;
-                dataPoint.Latitude = point.latitude;
+                if (DataPointExists(point.Time)) continue;
+                var dataPoint = GetDataPointWithInterpolation(point.Time);
+                dataPoint.Longitude = point.Longitude;
+                dataPoint.Latitude = point.Latitude;
                 pointsToAdd.Add(dataPoint);
             }
             pointsToAdd.ForEach(point => InsertDataPoint(point));
