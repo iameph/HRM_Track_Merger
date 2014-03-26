@@ -25,8 +25,8 @@ namespace HRM_Track_Merger.PolarXML {
             return new User(elem);
         }
         //<xs:element name="email" type="xs:string" minOccurs="0"/>
-        public string Email;
+        public string Email { get; set; }
         //<xs:element name="nickname" type="xs:string" minOccurs="0"/>
-        public string NickName;
+        public string NickName { get; set; }
     }
 }

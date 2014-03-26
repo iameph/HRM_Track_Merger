@@ -47,29 +47,29 @@ namespace HRM_Track_Merger.PolarXML {
         public static ExerciseLap Parse(XmlElement elem) {
             return new ExerciseLap(elem);
         }
-        public int Index;
+        public int Index { get; set; }
         //xs:element name="duration" minOccurs="0">
-        public TimeSpan Duration;
+        public TimeSpan Duration { get; set; }
         //<xs:element ref="heart-rate" minOccurs="0"/>
-        public HeartRateRange HeartRate;
+        public HeartRateRange HeartRate { get; set; }
         //<xs:element name="speed" type="float-range" minOccurs="0"/>
-        public FloatRange Speed;
+        public FloatRange Speed { get; set; }
         //<xs:element name="cadence" type="short-range" minOccurs="0"/>
-        public ShortRange Cadence;
+        public ShortRange Cadence { get; set; }
         //<xs:element ref="power" minOccurs="0"/>
-        public PowerData Power;
+        public PowerData Power { get; set; }
         //<xs:element name="temperature" type="float-range" minOccurs="0"/>
-        public FloatRange Temperature;
+        public FloatRange Temperature { get; set; }
         //<xs:element name="altitude" type="xs:float" minOccurs="0"/>
-        public double? Altitude;
+        public double? Altitude { get; set; }
         //<xs:element name="ascent" type="xs:float" minOccurs="0"/>
-        public double? Ascent;
+        public double? Ascent { get; set; }
         //<xs:element name="descent" type="xs:float" minOccurs="0"/>
-        public double? Descent;
+        public double? Descent { get; set; }
         //<xs:element name="distance" minOccurs="0">...</xs:element>
-        public double? Distance;
+        public double? Distance { get; set; }
         //<xs:element ref="ending-values" minOccurs="0"/>
-        public EndingValues EndingValues;
+        public EndingValues EndingValues { get; set; }
 
         public class IndexComparer : IComparer<ExerciseLap> {
             public int Compare(ExerciseLap x, ExerciseLap y) {

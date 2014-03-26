@@ -22,10 +22,10 @@ namespace HRM_Track_Merger.PolarXML {
             return new EndingValues(elem);
         }
         //xs:element name="heart-rate" minOccurs="0">
-        public byte? HeartRate;
+        public byte? HeartRate { get; set; }
         //<xs:element name="speed" type="xs:float" minOccurs="0"/>
-        public double? Speed;
+        public double? Speed { get; set; }
         //<xs:element name="cadence" minOccurs="0">
-        public byte? Cadence;
+        public byte? Cadence { get; set; }
     }
 }

@@ -23,9 +23,10 @@ namespace HRM_Track_Merger.PolarXML {
         public static FloatRange Parse(XmlElement elem) {
             return new FloatRange(elem);
         }
-        public double? Minimum;
-        public double? Maximum;
-        public double? Average;
+        public double? Minimum { get; set; }
+        public double? Maximum { get; set; }
+        public double? Average { get; set; }
+
         public Range<double> GetNotNullableRange() {
             List<double> values = new List<double>();
             if (Minimum.HasValue) {

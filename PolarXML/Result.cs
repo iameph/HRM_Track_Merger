@@ -60,27 +60,27 @@ namespace HRM_Track_Merger.PolarXML {
             return new Result(node);
         }
         //<xs:element ref="heart-rate" minOccurs="0"/>
-        public HeartRateRange HeartRate;
+        public HeartRateRange HeartRate { get; set; }
         //<xs:element name="recording-rate" type="xs:short" minOccurs="0"/>
-        public TimeSpan? RecordingRate;
+        public TimeSpan? RecordingRate { get; set; }
         //<xs:element name="laps" minOccurs="0">
-        public List<ExerciseLap> Laps;
+        public List<ExerciseLap> Laps { get; set; }
         //<xs:element ref="power" minOccurs="0"/>
-        public PowerData Power;
+        public PowerData Power { get; set; }
         //<xs:element ref="speed" minOccurs="0"/>
-        public SpeedData Speed;
+        public SpeedData Speed { get; set; }
         //<xs:element name="altitude" type="float-range" minOccurs="0"/>
-        public FloatRange Altitude;
+        public FloatRange Altitude { get; set; }
         //<xs:element name="temperature" type="float-range" minOccurs="0"/>
-        public FloatRange Temperature;
+        public FloatRange Temperature { get; set; }
         //<xs:element ref="altitude-info" minOccurs="0"/>
-        public AltitudeInfo AltitudeInfo;
+        public AltitudeInfo AltitudeInfo { get; set; }
         //-<xs:element name="summary-zone" type="zone" minOccurs="0"/>
 
         //-<xs:element name="limits" minOccurs="0">
 
         //<xs:element name="samples" minOccurs="0">
-        public List<Sample> Samples;
+        public List<Sample> Samples { get; set; }
         //-<xs:element ref="activity-info" minOccurs="0"/>
 
     }

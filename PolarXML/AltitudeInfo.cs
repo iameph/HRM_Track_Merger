@@ -25,12 +25,12 @@ namespace HRM_Track_Merger.PolarXML {
             return new AltitudeInfo(elem);
         }
         //<xs:element name="vertical-speed-up" type="float-range" minOccurs="0"/>
-        public FloatRange VerticalSpeedUp;
+        public FloatRange VerticalSpeedUp { get; set; }
         //<xs:element name="vertical-speed-down" type="float-range" minOccurs="0"/>
-        public FloatRange VerticalSpeedDown;
+        public FloatRange VerticalSpeedDown { get; set; }
         //<xs:element name="ascent" type="xs:float" minOccurs="0"/>
-        public double? Ascent;
+        public double? Ascent { get; set; }
         //<xs:element name="descent" type="xs:float" minOccurs="0"/>
-        public double? Descent;
+        public double? Descent { get; set; }
     }
 }

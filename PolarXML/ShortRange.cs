@@ -23,9 +23,10 @@ namespace HRM_Track_Merger.PolarXML {
         public static ShortRange Parse(XmlElement elem) {
             return new ShortRange(elem);
         }
-        public byte? Minimum;
-        public byte? Maximum;
-        public byte? Average;
+        public byte? Minimum { get; set; }
+        public byte? Maximum { get; set; }
+        public byte? Average { get; set; }
+
         public Range<byte> GetNotNullableRange() {
             List<byte> values = new List<byte>();
             if (Minimum.HasValue) {

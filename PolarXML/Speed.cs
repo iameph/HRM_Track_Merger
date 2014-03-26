@@ -31,10 +31,10 @@ namespace HRM_Track_Merger.PolarXML {
             return new SpeedData(elem);
         }
         //<xs:element name="type" type="speedType" minOccurs="0"/>
-        public SpeedType? SpeedType;
+        public SpeedType? SpeedType { get; set; }
         //<xs:element name="speed" type="float-range" minOccurs="0"/>
-        public FloatRange Speed;
+        public FloatRange Speed { get; set; }
         //<xs:element name="cadence" type="short-range" minOccurs="0"/>
-        public ShortRange Cadence;
+        public ShortRange Cadence { get; set; }
     }
 }

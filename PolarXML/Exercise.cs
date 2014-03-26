@@ -28,15 +28,15 @@ namespace HRM_Track_Merger.PolarXML {
             return new Exercise(elem);
         }
         //<xs:element name="sport" minOccurs="0">...</xs:element> string
-        public string Sport;
+        public string Sport { get; set; }
         //<xs:element name="distance" minOccurs="0">...</xs:element> float, km
-        public double? Distance;
+        public double? Distance { get; set; }
         //<xs:element name="calories" minOccurs="0"> uint
-        public uint Calories;
+        public uint Calories { get; set; }
         //<xs:element name="duration" minOccurs="0"> string hh:mm:ss.xxx
-        public TimeSpan Duration;
+        public TimeSpan Duration { get; set; }
         //<xs:element ref="user-settings" minOccurs="0"/>
-        public UserSettings UserSettingsData;
+        public UserSettings UserSettingsData { get; set; }
         //-<xs:element name="moves" minOccurs="0">...</xs:element>
         //-<xs:element name="zones" minOccurs="0">...</xs:element>
 

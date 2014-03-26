@@ -28,10 +28,10 @@ namespace HRM_Track_Merger.PolarXML {
             return new PowerData(elem);
         }
         //<xs:element name="power" type="short-range" minOccurs="0"/>
-        public uint? Power;
+        public uint? Power { get; set; }
         //<xs:element name="pedal-index" type="float-range" minOccurs="0"/>
-        public FloatRange PedalIndex;
+        public FloatRange PedalIndex { get; set; }
         //xs:element name="left-right-balance" minOccurs="0"> float
-        public double? LeftRightBalance;
+        public double? LeftRightBalance { get; set; }
     }
 }

@@ -4,16 +4,8 @@ using System.Xml;
 
 namespace HRM_Track_Merger.PolarXML {
     class PolarXMLFile : ExerciseData.IExerciseCollection{
-        private List<ExerciseElement> _exercises;
-        public List<ExerciseElement> Exercises {
-            get {
-                return _exercises;
-            }
-            set {
-                _exercises = value;
-            }
-        }
-        public User User;
+        public List<ExerciseElement> Exercises {  get;  set; }
+        public User User { get; set; }
         public PolarXMLFile() {
         }
         public PolarXMLFile(string filename) {

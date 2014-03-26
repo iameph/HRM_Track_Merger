@@ -36,18 +36,18 @@ namespace HRM_Track_Merger.PolarXML {
         public static ExerciseElement Parse(XmlElement elem) {
             return new ExerciseElement(elem);
         }
-        public DateTime TimeCreated;
-        public DateTime? Time;
+        public DateTime TimeCreated { get; set; }
+        public DateTime? Time { get; set; }
         //xs:element name="sport" minOccurs="0">...</xs:element>
-        public string Sport;
+        public string Sport { get; set; }
         //<xs:element name="name" minOccurs="0">...</xs:element>
-        public string Name;
+        public string Name { get; set; }
         //<xs:element ref="target" minOccurs="0"/>
         //<xs:element ref="result" minOccurs="0"/>
-        public Result Result;
+        public Result Result { get; set; }
         //<xs:element name="sport-results" minOccurs="0">...</xs:element>
         //<xs:element name="note" minOccurs="0">...</xs:element>
-        public string Note;
+        public string Note { get; set; }
 
         private void setAvailabilityFlags() {
             if (Result != null && Result.Samples != null) {

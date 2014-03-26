@@ -31,12 +31,12 @@ namespace HRM_Track_Merger.PolarXML {
             return new UserSettings(elem);
         }
         //<xs:element ref="heart-rate" minOccurs="0"/>
-        public HeartRateRange HeartRate;
+        public HeartRateRange HeartRate { get; set; }
         //<xs:element name="vo2max" minOccurs="0"> byte
-        public byte? VO2Max;
+        public byte? VO2Max { get; set; }
         //<xs:element name="weight" minOccurs="0"> float
-        public double? Weight;
+        public double? Weight { get; set; }
         //<xs:element name="height" minOccurs="0"> float
-        public double? Height;
+        public double? Height { get; set; }
     }
 }

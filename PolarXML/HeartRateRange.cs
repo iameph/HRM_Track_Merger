@@ -34,7 +34,7 @@ namespace HRM_Track_Merger.PolarXML {
             return new HeartRateRange(elem);
         }
         //<xs:element name="resting" minOccurs="0">
-        public byte? Restring;
+        public byte? Restring { get; set; }
         //<xs:element name="minimum" minOccurs="0">
         //public byte? Minimum;
         //<xs:element name="average" minOccurs="0">
@@ -42,7 +42,7 @@ namespace HRM_Track_Merger.PolarXML {
         //<xs:element name="maximum" minOccurs="0">
         //public byte? Maximum;
         //<xs:element name="ending" minOccurs="0">
-        public byte? Ending;
+        public byte? Ending { get; set; }
 
         public object Clone() {
             return base.MemberwiseClone();

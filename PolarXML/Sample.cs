@@ -12,7 +12,10 @@ namespace HRM_Track_Merger.PolarXML {
             foreach (XmlElement el in elem.ChildNodes) {
                 switch (el.LocalName) {
                     case "type":
-                        Enum.TryParse<SampleType>(el.InnerXml,out SampleType);
+                        SampleType result;
+                        if (Enum.TryParse<SampleType>(el.InnerXml, out result)) {
+                            SampleType = result;
+                        }
                         break;
                     case "values":
                         var valStrings = new List<string>(el.InnerXml.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
@@ -27,8 +30,8 @@ namespace HRM_Track_Merger.PolarXML {
             return new Sample(elem);
         }
         //<xs:element name="type" type="sampleType"/>
-        public SampleType SampleType;
+        public SampleType SampleType { get; set; }
         //<xs:element name="values" type="xs:string"/>
-        public List<double> Values;
+        public List<double> Values { get; set; }
     }
 }
