@@ -2,8 +2,9 @@
 namespace HRM_Track_Merger.GarminTCX {
     public class TrackPointExtension {
         public const string TrackPointExtensionNS = "http://www.garmin.com/xmlschemas/ActivityExtension/v2";
-        public double? Speed;
-        public uint? Watts;
+        public double? Speed { get; set; }
+        public uint? Watts { get; set; }
+
         public System.Xml.XmlNode GenerateXML(System.Xml.XmlDocument doc) {
             var xmlNS = doc.DocumentElement.NamespaceURI;
             var elem = doc.CreateElement("Extensions", xmlNS);

@@ -1,8 +1,9 @@
 ﻿
 namespace HRM_Track_Merger.GarminTCX {
     public class Position {
-        public double Latitude;
-        public double Longitude;
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+
         public Position(double lat, double lon) {
             Latitude = lat;
             Longitude = lon;

@@ -3,19 +3,20 @@ using System.Collections.Generic;
 
 namespace HRM_Track_Merger.GarminTCX {
     public class Lap {
-        public DateTime StartTime;
-        public double TotalTimeSeconds;
-        public double DistanceMeters;
-        public double? MaximumSpeed;
-        public uint Calories;
-        public HeartRate AverageHeartRateBpm;
-        public HeartRate MaximumHeartRateBpm;
-        public string Intensity;
-        public byte? Cadence;
-        public string TriggerMethod;
-        public List<TrackPoint> Track;
-        public string Notes;
-        public LapExtension Extension;
+        public DateTime StartTime { get; set; }
+        public double TotalTimeSeconds { get; set; }
+        public double DistanceMeters { get; set; }
+        public double? MaximumSpeed { get; set; }
+        public uint Calories { get; set; }
+        public HeartRate AverageHeartRateBpm { get; set; }
+        public HeartRate MaximumHeartRateBpm { get; set; }
+        public string Intensity { get; set; }
+        public byte? Cadence { get; set; }
+        public string TriggerMethod { get; set; }
+        public List<TrackPoint> Track { get; set; }
+        public string Notes { get; set; }
+        public LapExtension Extension { get; set; }
+
         public System.Xml.XmlNode GenerateXML(System.Xml.XmlDocument doc) {
             var xmlNS = doc.DocumentElement.NamespaceURI;
             var lapElem = doc.CreateElement("Lap", xmlNS);

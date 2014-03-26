@@ -2,14 +2,13 @@
 
 namespace HRM_Track_Merger.GarminTCX {
     public class TrackPoint {
-
-        public DateTime Time;
-        public Position Position;
-        public double? AltitudeMeters;
-        public double? DistanceMeters;
-        public HeartRate HeartRateBpm;
-        public byte? Cadence;
-        public TrackPointExtension Extension;
+        public DateTime Time { get; set; }
+        public Position Position { get; set; }
+        public double? AltitudeMeters { get; set; }
+        public double? DistanceMeters { get; set; }
+        public HeartRate HeartRateBpm { get; set; }
+        public byte? Cadence { get; set; }
+        public TrackPointExtension Extension { get; set; }
 
         public System.Xml.XmlNode GenerateXML(System.Xml.XmlDocument doc) {
             var xmlNS = doc.DocumentElement.NamespaceURI;

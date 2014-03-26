@@ -15,8 +15,8 @@ namespace HRM_Track_Merger.GarminTCX {
             Activities = new List<Activity>();
         }
         public void Save(string fileName) {
-            Save(fileName, new XmlWriterSettings() { 
-                Indent=true
+            Save(fileName, new XmlWriterSettings() {
+                Indent = true
             });
         }
         public void Save(string fileName, XmlWriterSettings ws) {
@@ -29,13 +29,13 @@ namespace HRM_Track_Merger.GarminTCX {
             foreach (var act in Activities) {
                 doc.DocumentElement["Activities"].AppendNotNullChild(act.GenerateXML(doc));
             }
-            if (Author != null && Author.LangID!=null && Author.PartNumber!=null && Author.Version!=null) {
-                doc.DocumentElement.AppendNotNullChild(author.GenerateXML(doc));
+            if (Author != null && Author.LangID != null && Author.PartNumber != null && Author.Version != null) {
+                doc.DocumentElement.AppendNotNullChild(Author.GenerateXML(doc));
             }
             var utf8WithoutBom = new System.Text.UTF8Encoding(false);
             using (var sink = new System.IO.StreamWriter(fileName, false, utf8WithoutBom)) {
-                using( var writer = XmlWriter.Create(sink,ws)){
-                     doc.Save(writer);
+                using (var writer = XmlWriter.Create(sink, ws)) {
+                    doc.Save(writer);
                 }
             }
             System.Threading.Thread.CurrentThread.CurrentCulture = currentCulture;
@@ -45,8 +45,7 @@ namespace HRM_Track_Merger.GarminTCX {
         }
         private List<Activity> activities;
         public List<Activity> Activities { get { return activities; } protected set { activities = value; } }
-        private Author author;
-        public Author Author { get { return author; } set { author = value; } }
+        public Author Author { get; set; }
         public void SetSport(Sport sport, int idx) {
             if (Activities != null && Activities.Count > idx) {
                 Activities[idx].Sport = sport;

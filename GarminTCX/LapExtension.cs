@@ -2,10 +2,12 @@
 namespace HRM_Track_Merger.GarminTCX {
     public class LapExtension {
         public const string LapExtensionNS = "http://www.garmin.com/xmlschemas/ActivityExtension/v2";
-        public double? AvgSpeed;
-        public uint? MaxBikeCadence;
-        public uint? AvgWatts;
-        public uint? MaxWatts;
+
+        public double? AvgSpeed { get; set; }
+        public uint? MaxBikeCadence { get; set; }
+        public uint? AvgWatts { get; set; }
+        public uint? MaxWatts { get; set; }
+
         public System.Xml.XmlNode GenerateXML(System.Xml.XmlDocument doc) {
             var xmlNS = doc.DocumentElement.NamespaceURI;
             var elem = doc.CreateElement("Extensions", xmlNS);

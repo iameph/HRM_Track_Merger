@@ -1,10 +1,10 @@
 ﻿
 namespace HRM_Track_Merger.GarminTCX {
     public class Author {
-        public string Name = "";
-        public uint[] Version;
-        public string LangID;
-        public string PartNumber;
+        public string Name { get; set; }
+        public uint[] Version { get; set; }
+        public string LangID { get; set; }
+        public string PartNumber { get; set; }
 
         public System.Xml.XmlNode GenerateXML(System.Xml.XmlDocument doc) {
             var xmlNS = doc.DocumentElement.NamespaceURI;
@@ -29,6 +29,9 @@ namespace HRM_Track_Merger.GarminTCX {
                 elem.AppendChild(doc.CreateElement("PartNumber", xmlNS)).InnerXml = PartNumber;
             }
             return elem;
+        }
+        public Author() {
+            Name = "";
         }
     }
 }

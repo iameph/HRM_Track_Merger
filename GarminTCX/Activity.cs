@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 
 namespace HRM_Track_Merger.GarminTCX {
-    class Activity {
-        public Sport Sport = Sport.Other;
-        public DateTime Id;
-        public List<Lap> Laps;
-        public string Notes;
-        public Creator Creator;
+    public class Activity {
+        public Sport Sport { get; set; }
+        public DateTime Id { get; set; }
+        public List<Lap> Laps { get; set; }
+        public string Notes { get; set; }
+        public Creator Creator { get; set; }
         public System.Xml.XmlNode GenerateXML(System.Xml.XmlDocument doc) {
             var xmlNS = doc.DocumentElement.NamespaceURI;
             var actElem = doc.CreateElement("Activity", xmlNS);
@@ -26,6 +26,9 @@ namespace HRM_Track_Merger.GarminTCX {
                 actElem.AppendNotNullChild(Creator.GenerateXML(doc));
             }
             return actElem;
+        }
+        public Activity() {
+            Sport = Sport.Other;
         }
     }
 }

@@ -2,10 +2,10 @@
 
 namespace HRM_Track_Merger.GarminTCX {
     public class Creator : ICloneable {
-        public string Name;
-        public uint UnitID;
-        public uint ProductID;
-        public uint[] Version;
+        public string Name { get; set; }
+        public uint UnitID { get; set; }
+        public uint ProductID { get; set; }
+        public uint[] Version { get; set; }
 
         public System.Xml.XmlNode GenerateXML(System.Xml.XmlDocument doc) {
             var xmlNS = doc.DocumentElement.NamespaceURI;
