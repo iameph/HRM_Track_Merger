@@ -1,6 +1,6 @@
 ﻿
 namespace HRM_Track_Merger.ExerciseData {
-    enum Sex {
+    public enum Sex {
         Male,
         Female
     }
