@@ -71,23 +71,30 @@ namespace HRM_Track_Merger.ExerciseData {
             if (UserData == null) {
                 UserData = new UserData();
             }
-            replaceValue(ref UserData.Age, ref data.Age, currentDataHasPriority);
+            UserData.Age = replaceValue(UserData.Age, data.Age, currentDataHasPriority);
             if (data.Sex != null && !(currentDataHasPriority && UserData.Sex != null)) {
                 UserData.Sex = data.Sex;
             }
-            replaceValue(ref UserData.MaxHR, ref data.MaxHR, currentDataHasPriority);
-            replaceValue(ref UserData.RestHR, ref data.RestHR, currentDataHasPriority);
-            replaceValue(ref UserData.VO2Max, ref data.VO2Max, currentDataHasPriority);
-            replaceValue(ref UserData.Weight, ref data.Weight, currentDataHasPriority);
+            UserData.MaxHR = replaceValue(UserData.MaxHR, data.MaxHR, currentDataHasPriority);
+            UserData.RestHR = replaceValue(UserData.RestHR, data.RestHR, currentDataHasPriority);
+            UserData.VO2Max = replaceValue(UserData.VO2Max, data.VO2Max, currentDataHasPriority);
+            UserData.Weight = replaceValue(UserData.Weight, data.Weight, currentDataHasPriority);
         }
 
         public static bool NotNullAndNotDefault<T>(Nullable<T> val) where T : struct {
             return val.HasValue && !val.Value.Equals(default(T));
         }
-        private void replaceValue<T>(ref T? first, ref T? second, bool firstPriority) where T : struct {
+        private Nullable<T> replaceValue<T>(Nullable<T> first, Nullable<T> second, bool firstPriority) where T:struct {
             if (NotNullAndNotDefault(second) && !(firstPriority && NotNullAndNotDefault(first))) {
-                first = second;
+                return second;
             }
+            return first;
+        }
+        private T replaceValue<T>(T first, T second, bool firstPriority) where T : class {
+            if (second != null && !(firstPriority && first != null)) {
+                return second;
+            }
+            return first;
         }
 
         private void setDataAvailabilityFields(IExercise exercise) {
@@ -274,16 +281,13 @@ namespace HRM_Track_Merger.ExerciseData {
             if (UserData.VO2Max != null && UserData.VO2Max != 0) {
                 if (UserData.Sex == Sex.Male) {
                     result = (0.634 * heartRate + 0.404 * UserData.VO2Max.Value + 0.394 * UserData.Weight.Value + 0.271 * UserData.Age.Value - 95.7735);
-                }
-                else {
+                } else {
                     result = (0.45 * heartRate + 0.380 * UserData.VO2Max.Value + 0.103 * UserData.Weight.Value + 0.274 * UserData.Age.Value - 59.3954);
                 }
-            }
-            else {
+            } else {
                 if (UserData.Sex == Sex.Male) {
                     result = (0.6303 * heartRate + 0.1988 * UserData.Weight.Value + 0.2017 * UserData.Age.Value - 55.0969);
-                }
-                else {
+                } else {
                     result = (0.4472 * heartRate + 0.1263 * UserData.Weight.Value + 0.074 * UserData.Age.Value - 20.4022);
                 }
             }
@@ -308,12 +312,10 @@ namespace HRM_Track_Merger.ExerciseData {
             if (idx == 0) {
                 point = (DataPoint)DataPoints[0].Clone();
                 point.Time = time;
-            }
-            else if (idx == DataPoints.Count) {
+            } else if (idx == DataPoints.Count) {
                 point = (DataPoint)DataPoints.Last().Clone();
                 point.Time = time;
-            }
-            else {
+            } else {
                 point = DataPoint.Interpolate(DataPoints[idx - 1], DataPoints[idx], time);
             }
             return point;
