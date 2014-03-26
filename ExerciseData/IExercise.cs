@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+
 namespace HRM_Track_Merger.ExerciseData {
-    interface IExercise {
-        System.Collections.Generic.List<HRM_Track_Merger.ExerciseData.DataPoint> GetDataPoints();
-        System.Collections.Generic.List<HRM_Track_Merger.ExerciseData.DataPoint> GetDataPointsWithPartialData();
-        System.Collections.Generic.List<HRM_Track_Merger.ExerciseData.Lap> GetLaps();
-        HRM_Track_Merger.ExerciseData.UserData GetUserData();
+    public interface IExercise {
+        List<DataPoint> GetDataPoints();
+        List<DataPoint> GetDataPointsWithPartialData();
+        List<Lap> GetLaps();
+        UserData GetUserData();
         Summary GetTotals();
         bool IsAirPressureDataAvailable { get; }
         bool IsAltitudeDataAvailable { get; }

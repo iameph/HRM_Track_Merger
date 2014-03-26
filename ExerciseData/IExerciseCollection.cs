@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
 namespace HRM_Track_Merger.ExerciseData {
-    interface IExerciseCollection {
-        List<ExerciseData.IExercise> GetExercises();
+    public interface IExerciseCollection {
+        List<IExercise> GetExercises();
     }
 }
