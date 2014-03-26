@@ -1,6 +1,6 @@
 ﻿
 namespace HRM_Track_Merger.GarminTCX {
-    class Author {
+    public class Author {
         public string Name = "";
         public uint[] Version;
         public string LangID;

@@ -1,6 +1,6 @@
 ﻿
 namespace HRM_Track_Merger.ExerciseData {
-    class Lap {
+    public class Lap {
         public Summary Totals { get; set; }
     }
 }

@@ -1,6 +1,6 @@
 ﻿
 namespace HRM_Track_Merger.ExerciseData {
-    class Summary {
+    public class Summary {
         public DateTimeRange Time { get; set; }
         public Range<double> Speed { get; set; }
         public Range<double> HeartRate { get; set; }

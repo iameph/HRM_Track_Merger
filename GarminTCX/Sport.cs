@@ -1,6 +1,6 @@
 ﻿
 namespace HRM_Track_Merger.GarminTCX {
-    enum Sport {
+    public enum Sport {
         Biking,
         Running,
         Other

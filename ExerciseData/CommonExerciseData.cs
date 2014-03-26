@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace HRM_Track_Merger.ExerciseData {
-    class CommonExerciseData {
+    public class CommonExerciseData {
         public UserData UserData { get; set; }
         public List<Lap> Laps { get; private set; }
         public Summary Totals { get; private set; }

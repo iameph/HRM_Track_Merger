@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 
 namespace HRM_Track_Merger {
-    class CommandLineArguments {
+    public class CommandLineArguments {
         private List<string> hrmExtensions= new List<string>(new string[]{".hrm",".xml"});
         private List<string> gpsExtensions = new List<string>(new string[] { ".gpx" });
         private Dictionary<string, string> options = new Dictionary<string,string>();

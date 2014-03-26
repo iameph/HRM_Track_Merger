@@ -1,6 +1,6 @@
 ﻿
 namespace HRM_Track_Merger.ExerciseData {
-    class UserData {
+    public class UserData {
         public double? Weight { get; set; }
         public int? MaxHR { get; set; }
         public int? RestHR { get; set; }

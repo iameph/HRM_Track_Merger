@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Xml;
 
 namespace HRM_Track_Merger {
-    class GPXFile {
+    public class GPXFile {
         private XmlElement _currSegment;
         private bool isPolarStupidGPX = false;
         private string nameSpace = "";

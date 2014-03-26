@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Xml;
 
 namespace HRM_Track_Merger.GarminTCX {
-    class TCXFile {
+    public class TCXFile {
         private string defaultFile = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
             + "<TrainingCenterDatabase xsi:schemaLocation=\"http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2 http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd\" "
             + "xmlns:ns5=\"http://www.garmin.com/xmlschemas/ActivityGoals/v1\" xmlns:ns3=\"http://www.garmin.com/xmlschemas/ActivityExtension/v2\"  "

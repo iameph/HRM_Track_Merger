@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace HRM_Track_Merger {
-    class TrackPoint : IComparable<TrackPoint>,ICloneable {
+    public class TrackPoint : IComparable<TrackPoint>, ICloneable {
         public DateTime Time { get; set; }
         public double Elevation { get; set; }
         public double Latitude { get; set; }

@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace HRM_Track_Merger.GarminTCX {
-    class TrackPoint {
+    public class TrackPoint {
 
         public DateTime Time;
         public Position Position;

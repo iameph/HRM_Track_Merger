@@ -1,6 +1,6 @@
 ﻿
 namespace HRM_Track_Merger.GarminTCX {
-    class HeartRate {
+    public class HeartRate {
         public byte Value;
         public HeartRate(byte val) {
             Value = val;

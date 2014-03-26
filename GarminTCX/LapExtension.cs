@@ -1,6 +1,6 @@
 ﻿
 namespace HRM_Track_Merger.GarminTCX {
-    class LapExtension {
+    public class LapExtension {
         public const string LapExtensionNS = "http://www.garmin.com/xmlschemas/ActivityExtension/v2";
         public double? AvgSpeed;
         public uint? MaxBikeCadence;

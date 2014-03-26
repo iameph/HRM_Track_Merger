@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 namespace HRM_Track_Merger.GarminTCX {
-    class Lap {
+    public class Lap {
         public DateTime StartTime;
         public double TotalTimeSeconds;
         public double DistanceMeters;

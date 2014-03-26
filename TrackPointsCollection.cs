@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 namespace HRM_Track_Merger {
-    class TrackPointsCollection {
+    public class TrackPointsCollection {
         
         public List<TrackPoint> TrackPoints { get; set; }
         public TrackPointsCollection(List<TrackPoint> trackPoints) {

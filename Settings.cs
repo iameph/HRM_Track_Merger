@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 
 namespace HRM_Track_Merger {
-    class Settings {
+    public class Settings {
         public double? Age { get; set; }
         public DateTime? Birthday { get; set; }
         public double? Weight { get; set; }

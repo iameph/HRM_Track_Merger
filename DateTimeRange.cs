@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace HRM_Track_Merger {
-    class DateTimeRange {
+    public class DateTimeRange {
         public DateTimeRange(DateTime start, DateTime end){
             Start = start;
             End = end;

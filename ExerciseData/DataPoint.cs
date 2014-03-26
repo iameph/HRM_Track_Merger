@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace HRM_Track_Merger.ExerciseData {
-    class DataPoint : IComparable<DataPoint>, ICloneable {
+    public class DataPoint : IComparable<DataPoint>, ICloneable {
         public double HeartRate { get; set; }
         public double Speed { get; set; }
         public double Cadence { get; set; }

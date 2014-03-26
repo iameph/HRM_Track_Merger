@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace HRM_Track_Merger.GarminTCX {
-    class Creator : ICloneable{
+    public class Creator : ICloneable {
         public string Name;
         public uint UnitID;
         public uint ProductID;

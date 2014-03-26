@@ -1,6 +1,6 @@
 ﻿
 namespace HRM_Track_Merger {
-    class Range<T> {
+    public class Range<T> {
         public T Min { get; set; }
         public T Max { get; set; }
         public T Avg { get; set; }
