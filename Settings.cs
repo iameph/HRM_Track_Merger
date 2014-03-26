@@ -5,16 +5,16 @@ using System.Linq;
 
 namespace HRM_Track_Merger {
     class Settings {
-        public double? Age;
-        public DateTime? Birthday;
-        public double? Weight;
-        public ExerciseData.Sex? Sex;
-        public double? VO2max;
+        public double? Age { get; set; }
+        public DateTime? Birthday { get; set; }
+        public double? Weight { get; set; }
+        public ExerciseData.Sex? Sex { get; set; }
+        public double? VO2max { get; set; }
 
-        public string Sport;
+        public string Sport { get; set; }
 
-        public GarminTCX.Creator Device;
-        public GarminTCX.Author Author;
+        public GarminTCX.Creator Device { get; set; }
+        public GarminTCX.Author Author { get; set; }
         public Settings() {
         }
         public Settings(string filename) {

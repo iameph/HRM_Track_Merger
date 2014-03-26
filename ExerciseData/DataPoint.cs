@@ -1,18 +1,18 @@
 ﻿using System;
 
 namespace HRM_Track_Merger.ExerciseData {
-    class DataPoint : IComparable<DataPoint>, ICloneable{
-        public double HeartRate;
-        public double Speed;
-        public double Cadence;
-        public double Altitude;
-        public double Power;
-        public double PowerBalance;
-        public double AirPressure;
-        public DateTime Time;
-        public double Distance;
-        public double Longitude;
-        public double Latitude;
+    class DataPoint : IComparable<DataPoint>, ICloneable {
+        public double HeartRate { get; set; }
+        public double Speed { get; set; }
+        public double Cadence { get; set; }
+        public double Altitude { get; set; }
+        public double Power { get; set; }
+        public double PowerBalance { get; set; }
+        public double AirPressure { get; set; }
+        public DateTime Time { get; set; }
+        public double Distance { get; set; }
+        public double Longitude { get; set; }
+        public double Latitude { get; set; }
 
         public int CompareTo(DataPoint other) {
             return Time.CompareTo(other.Time);
