@@ -17,9 +17,9 @@ namespace HRM_Track_Merger {
             File = new XmlDocument();
             File.Load(filename);
             nameSpace = File.DocumentElement.NamespaceURI;
-            if (File.DocumentElement.GetAttribute("version", nameSpace) == "1.0" &&
-                File.DocumentElement.GetAttribute("creator", nameSpace) == "Polar ProTrainer 5 - www.polar.fi" &&
-                File.DocumentElement.GetAttribute("xmlns", nameSpace) == "http://www.topografix.com/GPX/1/0") {
+            if (File.DocumentElement.GetAttribute("version").Contains("1.0") &&
+                File.DocumentElement.GetAttribute("creator").Contains("Polar ProTrainer")
+                ) {
                     isPolarStupidGPX = true;
             }
             _currSegment = null;
@@ -110,6 +110,9 @@ namespace HRM_Track_Merger {
                 trkElem.RemoveChild(trkElem["name"]);
                 trkElem.RemoveChild(trkElem["desc"]);
             }
+        }
+        public bool IsPolarGPX {
+            get { return isPolarStupidGPX; }
         }
     }
 }
