@@ -65,7 +65,7 @@ namespace HRM_Track_Merger {
                 point.Longitude = Double.Parse(lon.Value, format);
                 point.Time = DateTime.Parse(time.InnerText);
                 if (isPolarStupidGPX) {
-                    point.Time -= TimeZoneInfo.Local.BaseUtcOffset;
+                    point.Time = point.Time.ToUniversalTime();
                 }
                 point.Time += offset;
                 if (elevationElement != null) {
@@ -95,7 +95,7 @@ namespace HRM_Track_Merger {
             lon.Value = XmlConvert.ToString(point.Longitude);
             var xmlTime = point.Time.ToUniversalTime();
             if (isPolarStupidGPX) {
-                xmlTime += TimeZoneInfo.Local.BaseUtcOffset;
+                xmlTime = xmlTime.ToLocalTime();
             }
             time.InnerText = String.Format("{0}-{1:D2}-{2:D2}T{3:D2}:{4:D2}:{5:D2}Z", xmlTime.Year, xmlTime.Month, xmlTime.Day, xmlTime.Hour, xmlTime.Minute, xmlTime.Second);
             trk.Attributes.Append(lat);
