@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HRM_Track_Merger", "HRM_Track_Merger\HRM_Track_Merger.csproj", "{CF71CF92-606F-4327-B754-24A00C663416}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HRM_Track_Merger.Test", "HRM_Track_Merger.Test\HRM_Track_Merger.Test.csproj", "{E87194B1-DB7E-4AFC-89D7-8147507911F0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CF71CF92-606F-4327-B754-24A00C663416}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF71CF92-606F-4327-B754-24A00C663416}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF71CF92-606F-4327-B754-24A00C663416}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF71CF92-606F-4327-B754-24A00C663416}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E87194B1-DB7E-4AFC-89D7-8147507911F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E87194B1-DB7E-4AFC-89D7-8147507911F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E87194B1-DB7E-4AFC-89D7-8147507911F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E87194B1-DB7E-4AFC-89D7-8147507911F0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
