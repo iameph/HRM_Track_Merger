@@ -71,6 +71,13 @@ namespace HRM_Track_Merger {
         public Dictionary<string, string> GetOptions() {
             return new Dictionary<string, string>(options);
         }
-        
+
+        public Dictionary<string, string> Options
+        {
+            get
+            {
+                return new Dictionary<string, string>(options);
+            }
+        }
     }
 }

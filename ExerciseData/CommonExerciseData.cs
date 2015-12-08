@@ -14,7 +14,7 @@ namespace HRM_Track_Merger.ExerciseData {
         public bool IsAltitudeDataAvailable { get; private set; }
         public bool IsCyclingDataAvailable { get; private set; }
         public bool IsAirPressureDataAvailable { get; private set; }
-        public bool IsSpeedDataAvailable { get; private set; }
+        public bool IsSpeedDataAvailable { get; set; }
         public bool IsPowerDataAvailable { get; private set; }
         public bool IsBalanceDataAvailable { get; private set; }
         public bool IsPedallingIndexDataAvailable { get; private set; }
@@ -380,6 +380,10 @@ namespace HRM_Track_Merger.ExerciseData {
                     MaximumHeartRateBpm = new GarminTCX.HeartRate(Utility.RoundByte(lap.Totals.HeartRate.Max)),
                     Track = new List<GarminTCX.TrackPoint>()
                 };
+                if (!IsSpeedDataAvailable)
+                {
+                    tcxLap.DistanceMeters = 0;
+                }
                 if (IsCadenceDataAvailable || IsPowerDataAvailable || IsSpeedDataAvailable) {
                     if (tcxLap.Extension == null) {
                         tcxLap.Extension = new GarminTCX.LapExtension();

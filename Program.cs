@@ -4,79 +4,109 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace HRM_Track_Merger {
-    class Program {
-        static int Main(string[] args) {
-            if (args.Length == 0 || args.Contains("/?") || args.Contains("-h") || args.Contains("--h)")) {
+namespace HRM_Track_Merger
+{
+    internal class Program
+    {
+        private static int Main(string[] args)
+        {
+            if (args.Length == 0 || args.Contains("/?") || args.Contains("-h") || args.Contains("--h)"))
+            {
                 ShowUsageInfo();
                 return 0;
             }
             var currentCulture = System.Threading.Thread.CurrentThread.CurrentCulture;
             System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
-            try {
+            try
+            {
                 var cmdArgs = CommandLineArguments.Parse(args);
-                if (cmdArgs.HRMFileName == null) {
+                if (cmdArgs.HRMFileName == null)
+                {
                     throw new InvalidArgumentsException("No HRM file in arguments or file doesn't exist");
                 }
                 var settings = GetSettingsFromFile(AssemblyDirectory + @"\settings.cfg");
                 var exercises = GetExercisesFromHRMFile(GetHRMFile(cmdArgs));
-                foreach (var ex in exercises) {
+
+                if (cmdArgs.Options.ContainsKey("nospeed"))
+                {
+                    exercises.ForEach(ex => ex.IsSpeedDataAvailable = false);
+                }
+
+                foreach (var ex in exercises)
+                {
                     ex.UpdateUserData(settings.GetUserData(ex.Totals.Time.Start), true);
                     ex.UpdateUserData(ParseUserOptions(cmdArgs.GetOptions()), false);
                 }
 
-                if (cmdArgs.GPSFileName != null) {
+
+                if (cmdArgs.GPSFileName != null)
+                {
                     TimeSpan offset = TimeSpan.Zero;
-                    if (cmdArgs.GetOptions().ContainsKey("offset")) {
+                    if (cmdArgs.GetOptions().ContainsKey("offset"))
+                    {
                         offset = new TimeSpan(0, 0, Int32.Parse(cmdArgs.GetOptions()["offset"]));
                     }
-                    foreach (var ex in exercises) {
+                    foreach (var ex in exercises)
+                    {
                         ex.AddGPSData(new GPXFile(cmdArgs.GPSFileName), offset);
                     }
                 }
-                foreach (var ex in exercises) {
+                foreach (var ex in exercises)
+                {
                     ex.UpdateCaloriesData();
                 }
                 var tcxFile = new GarminTCX.TCXFile();
-                foreach (var ex in exercises) {
+                foreach (var ex in exercises)
+                {
                     tcxFile.Activities.Add(ex.ConvertToTCXActivity());
                 }
                 tcxFile.SetSport(GetSportFromSettingsOrArguments(cmdArgs, settings));
-                if (settings.Device != null) {
-                    foreach (var act in tcxFile.Activities) {
+                if (settings.Device != null)
+                {
+                    foreach (var act in tcxFile.Activities)
+                    {
                         act.Creator = settings.Device;
                     }
                 }
-                if (settings.Author != null) {
+                if (settings.Author != null)
+                {
                     tcxFile.Author = settings.Author;
                 }
                 string outputFileName;
-                if (cmdArgs.GetOptions().ContainsKey("output")) {
+                if (cmdArgs.GetOptions().ContainsKey("output"))
+                {
                     outputFileName = cmdArgs.GetOptions()["output"];
                 }
-                else {
+                else
+                {
                     outputFileName = GenerateOutputFileName(cmdArgs.HRMFileName, cmdArgs.GPSFileName);
                 }
-                tcxFile.Save(outputFileName, new System.Xml.XmlWriterSettings() { Indent = true, IndentChars = "\t" });
+                tcxFile.Save(outputFileName, new System.Xml.XmlWriterSettings() {Indent = true, IndentChars = "\t"});
             }
-            catch (InvalidArgumentsException e) {
+            catch (InvalidArgumentsException e)
+            {
                 Console.WriteLine("Incorrect arguments! Execute program with /? key for help\n" + e.Message);
                 return 1;
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 Console.WriteLine("Something bad happened. Please contact author. Error message: " + e.Message);
                 return 1;
             }
             return 0;
         }
 
-        private static GarminTCX.Sport GetSportFromSettingsOrArguments(CommandLineArguments cmdArgs, Settings settings) {
+        private static GarminTCX.Sport GetSportFromSettingsOrArguments(CommandLineArguments cmdArgs, Settings settings)
+        {
             var sport = GarminTCX.Sport.Other;
-            if (settings.Sport != null) {
+            if (settings.Sport != null)
+            {
                 Enum.TryParse<GarminTCX.Sport>(settings.Sport, true, out sport);
             }
-            if (cmdArgs.GetOptions().ContainsKey("sport")) {
-                if (!Enum.TryParse<GarminTCX.Sport>(cmdArgs.GetOptions()["sport"], true, out sport)) {
+            if (cmdArgs.GetOptions().ContainsKey("sport"))
+            {
+                if (!Enum.TryParse<GarminTCX.Sport>(cmdArgs.GetOptions()["sport"], true, out sport))
+                {
                     Console.WriteLine("Incorrect sport name, use Other instead");
                     sport = GarminTCX.Sport.Other;
                 }
@@ -84,17 +114,22 @@ namespace HRM_Track_Merger {
             return sport;
         }
 
-        private static List<ExerciseData.CommonExerciseData> GetExercisesFromHRMFile(ExerciseData.IExerciseCollection hrmFile) {
+        private static List<ExerciseData.CommonExerciseData> GetExercisesFromHRMFile(
+            ExerciseData.IExerciseCollection hrmFile)
+        {
             var exercises = new List<ExerciseData.CommonExerciseData>();
-            foreach (var ex in hrmFile.GetExercises()) {
+            foreach (var ex in hrmFile.GetExercises())
+            {
                 exercises.Add(new ExerciseData.CommonExerciseData(ex));
             }
             return exercises;
         }
 
-        private static ExerciseData.IExerciseCollection GetHRMFile(CommandLineArguments cmdArgs) {
+        private static ExerciseData.IExerciseCollection GetHRMFile(CommandLineArguments cmdArgs)
+        {
             ExerciseData.IExerciseCollection hrmFile;
-            switch (Path.GetExtension(cmdArgs.HRMFileName)) {
+            switch (Path.GetExtension(cmdArgs.HRMFileName))
+            {
                 case ".hrm":
                     hrmFile = PolarHRM.PolarHRMFile.Parse(cmdArgs.HRMFileName);
                     break;
@@ -107,21 +142,26 @@ namespace HRM_Track_Merger {
             return hrmFile;
         }
 
-        private static Settings GetSettingsFromFile(string fileName) {
+        private static Settings GetSettingsFromFile(string fileName)
+        {
             Settings settings;
-            if (File.Exists(fileName)) {
+            if (File.Exists(fileName))
+            {
                 settings = new Settings(fileName);
             }
-            else {
+            else
+            {
                 settings = Settings.Default;
             }
             return settings;
         }
 
-        private static string GenerateOutputFileName(string hrmFileName, string gpsFileName) {
+        private static string GenerateOutputFileName(string hrmFileName, string gpsFileName)
+        {
             StringBuilder name = new StringBuilder();
             name.Append(Path.GetFileNameWithoutExtension(hrmFileName));
-            if (gpsFileName != null) {
+            if (gpsFileName != null)
+            {
                 name.Append("_Merge");
             }
             name.Append("_");
@@ -132,34 +172,46 @@ namespace HRM_Track_Merger {
             return name.ToString();
         }
 
-        private static ExerciseData.UserData ParseUserOptions(Dictionary<string, string> dictionary) {
+        private static ExerciseData.UserData ParseUserOptions(Dictionary<string, string> dictionary)
+        {
             var result = new ExerciseData.UserData();
-            if (dictionary.ContainsKey("weight")) {
-                try {
+            if (dictionary.ContainsKey("weight"))
+            {
+                try
+                {
                     result.Weight = Double.Parse(dictionary["weight"]);
                 }
-                catch (Exception) {
+                catch (Exception)
+                {
                     throw new InvalidArgumentsException("Can't parse weight");
                 }
             }
-            if (dictionary.ContainsKey("age")) {
-                try {
+            if (dictionary.ContainsKey("age"))
+            {
+                try
+                {
                     result.Age = Double.Parse(dictionary["age"]);
                 }
-                catch (Exception) {
+                catch (Exception)
+                {
                     throw new InvalidArgumentsException("Can't parse age");
                 }
             }
-            if (dictionary.ContainsKey("vo2max")) {
-                try {
+            if (dictionary.ContainsKey("vo2max"))
+            {
+                try
+                {
                     result.VO2Max = Int32.Parse(dictionary["vo2max"]);
                 }
-                catch (Exception) {
+                catch (Exception)
+                {
                     throw new InvalidArgumentsException("Can't parse vo2max");
                 }
             }
-            if (dictionary.ContainsKey("sex")) {
-                switch (dictionary["sex"].ToLower()) {
+            if (dictionary.ContainsKey("sex"))
+            {
+                switch (dictionary["sex"].ToLower())
+                {
                     case "male":
                         result.Sex = ExerciseData.Sex.Male;
                         break;
@@ -175,20 +227,23 @@ namespace HRM_Track_Merger {
             return result;
         }
 
-        private static void ShowUsageInfo() {
+        private static void ShowUsageInfo()
+        {
             System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
             System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
             string version = fvi.FileVersion;
             string name = "HRM_Track_Merger";
-            Console.WriteLine(String.Join("\n", new string[] { 
+            Console.WriteLine(String.Join("\n", new string[]
+            {
                 name + " version: " + version,
                 "Software to merge heartrate monitor data with gps data to TCX XML format",
                 "",
-                "Usage: "+name+ ".exe <hrm file> [<gpx file>] [/output:<output_file_name>] [/offset:<offset>] [/sport:<sport>] [/sex:<sex>] [/age:<age>] [/weight:<weight>] [/vo2max:<vo2max>]",
+                "Usage: " + name +
+                ".exe <hrm file> [<gpx file>] [/output:<output_file_name>] [/offset:<offset>] [/sport:<sport>] [/sex:<sex>] [/age:<age>] [/weight:<weight>] [/vo2max:<vo2max>]",
                 "where:",
                 "<hrm file> - path to hrm file, currently Polar HRM(.hrm) and Polar XML(.xml) are supported",
                 "<gpx file> - path to gpx file",
-                "<output_file_name> - path to output file" ,
+                "<output_file_name> - path to output file",
                 "<offset> - offset in seconds to add to GPS time",
                 "<sport> - Biking, Running or Other(default)",
                 "",
@@ -200,19 +255,29 @@ namespace HRM_Track_Merger {
             }));
         }
 
-        private static void PrintInputArguments(TimeSpan offset, DateTime startTime, TimeSpan duration, TimeSpan step) {
-            Console.WriteLine("Input arguments:\n" + "Offset:{0}\n" + "Start Time:{1}\n" + "Duration:{2}\n" + "Step:{3}", offset, startTime, duration, step);
+        private static void PrintInputArguments(TimeSpan offset, DateTime startTime, TimeSpan duration, TimeSpan step)
+        {
+            Console.WriteLine(
+                "Input arguments:\n" + "Offset:{0}\n" + "Start Time:{1}\n" + "Duration:{2}\n" + "Step:{3}", offset,
+                startTime, duration, step);
         }
 
-        private static string CreateCorrectedFilename(string fileName) {
+        private static string CreateCorrectedFilename(string fileName)
+        {
             return CreateCorrectedFilename(fileName, "_corrected");
         }
-        public static string CreateCorrectedFilename(string fileName, string add) {
+
+        public static string CreateCorrectedFilename(string fileName, string add)
+        {
             var info = new FileInfo(fileName);
-            return info.DirectoryName + (info.DirectoryName.EndsWith("\\") ? "" : "\\") + Path.GetFileNameWithoutExtension(info.Name) + add + info.Extension;
+            return info.DirectoryName + (info.DirectoryName.EndsWith("\\") ? "" : "\\") +
+                   Path.GetFileNameWithoutExtension(info.Name) + add + info.Extension;
         }
-        static public string AssemblyDirectory {
-            get {
+
+        public static string AssemblyDirectory
+        {
+            get
+            {
                 string codeBase = System.Reflection.Assembly.GetExecutingAssembly().CodeBase;
                 UriBuilder uri = new UriBuilder(codeBase);
                 string path = Uri.UnescapeDataString(uri.Path);
